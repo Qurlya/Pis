@@ -95,3 +95,4 @@ console.log(manager.getOperationCount());
 {
     let testVariable = 100;
 }
+console.log(testVariable)
