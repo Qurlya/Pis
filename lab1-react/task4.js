@@ -62,7 +62,7 @@ let sumEven = 0;
 for (const item of numbers) {
     if (item % 2 === 0) sumEven += item;
 }
-console.log(sum);
+console.log(sumEven);
 
 
 // --- Задача уровня собеседования ---
@@ -74,5 +74,5 @@ console.log(sum);
 for (let i = 0; i < 3; i++) {
   console.log(i);
 }
-//console.log(i);
+console.log(i);
 
