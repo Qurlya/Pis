@@ -1,0 +1,158 @@
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №2
+  ИТОГОВОЕ ЗАДАНИЕ
+  Вариант 03
+
+  Стиль варианта: «ТЦ» — ТЦ «Галерея».
+
+  ЗАДАНИЕ: спроектируйте и свёрстайте с нуля полноценный одностраничный
+  сайт в стиле «ТЦ», используя весь материал лабораторной
+  работы №2 — семантическую вёрстку, Flexbox, Grid, box model, position,
+  модульную шкалу размеров, псевдоклассы/псевдоэлементы и адаптивность
+  (media query).
+
+  ТРЕБОВАНИЯ:
+  - Дизайн и цветовая палитра должны соответствовать теме варианта —
+    подберите их самостоятельно.
+  - На странице обязательно должна быть форма, которая содержит:
+    4 текстовых поля разных типов (текст, email, пароль, телефон) и
+    две группы radio-кнопок — выбор из трёх вариантов и выбор из двух.
+  - Остальная структура сайта, секции и оформление — на ваше усмотрение.
+    Ниже — стандартный каркас страницы, который используется во всех
+    вариантах; наполняйте и стилизуйте его по своему вкусу.
+
+  Подробные подсказки по каждой теме и критерии оценки — в методичке
+  к лабораторной работе №2.
+-->
+
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+    <title>ТЦ «Галерея» — вариант 03</title>
+    <link rel="stylesheet" href="finalTask.css">
+  </head>
+  <body>
+
+    <header>
+      <h1>ТЦ «Галерея»</h1>
+      <nav class="nav">
+        <a href="#">Главная</a>
+        <a href="#">О нас</a>
+        <a href="#">Услуги</a>
+        <a href="#">Контакты</a>
+      </nav>
+    </header>
+
+    <main>
+
+      <section class="hero">
+        <p>Сотни магазинов и развлечений под одной крышей.</p>
+      </section>
+
+      <section class="features">
+        <div class="feature-card">
+          <h3>Качество</h3>
+          <p>Мы тщательно следим за каждой деталью.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Скорость</h3>
+          <p>Быстро решаем любые вопросы клиентов.</p>
+        </div>
+        <div class="feature-card">
+          <h3>Забота о клиенте</h3>
+          <p>Индивидуальный подход к каждому.</p>
+        </div>
+      </section>
+
+      <section class="food-court">
+        <div class="food-court-copy">
+          <h2>Фуд-корт</h2>
+          <p>
+            На третьем этаже ТЦ «Галерея» работает уютный фуд-корт более чем
+            на 400 посадочных мест. Здесь представлены кухни мира: итальянская,
+            японская, кавказская и домашние десерты, а также кофейни с
+            собственным зерном.
+          </p>
+          <ul class="food-court-list">
+            <li>Более 20 кафе и ресторанов</li>
+            <li>Детская зона с аниматорами</li>
+            <li>Wi-Fi и зарядные станции</li>
+            <li>Ежедневно с 10:00 до 22:00</li>
+          </ul>
+        </div>
+        <figure class="food-court-figure">
+          <img src="image.jpg" alt="Фуд-корт ТЦ «Галерея»">
+          <figcaption>Панорама фуд-корта ТЦ «Галерея»</figcaption>
+        </figure>
+      </section>
+
+      <section class="promo">
+        <div class="promo-card">
+          <span class="badge">Скидка 10%</span>
+          <h2>Специальное предложение</h2>
+          <p>Оставьте заявку прямо сейчас — расскажем обо всех деталях.</p>
+        </div>
+      </section>
+
+      <section class="form-section">
+        <h2>Оставить заявку</h2>
+        <form action="/submit" method="POST">
+
+          <div class="form-field">
+            <label class="required" for="fname">Имя</label>
+            <input type="text" id="fname" name="name" placeholder="Ваше имя" required>
+          </div>
+
+          <div class="form-field">
+            <label class="required" for="femail">Email</label>
+            <input type="email" id="femail" name="email" placeholder="you@example.com" required>
+          </div>
+
+          <div class="form-field">
+            <label class="required" for="fpass">Пароль</label>
+            <input type="password" id="fpass" name="password" placeholder="Придумайте пароль" required>
+          </div>
+
+          <div class="form-field">
+            <label class="required" for="fphone">Телефон</label>
+            <input type="tel" id="fphone" name="phone" placeholder="+7 (900) 000-00-00" required>
+          </div>
+
+          <fieldset class="radio-group">
+            <legend>Удобное время визита</legend>
+            <label for="time_morning">
+              <input type="radio" id="time_morning" name="visit_time" value="morning"> Утро
+            </label>
+            <label for="time_day">
+              <input type="radio" id="time_day" name="visit_time" value="day"> День
+            </label>
+            <label for="time_evening">
+              <input type="radio" id="time_evening" name="visit_time" value="evening"> Вечер
+            </label>
+          </fieldset>
+
+          <fieldset class="radio-group">
+            <legend>Получать новости о скидках?</legend>
+            <label for="news_yes">
+              <input type="radio" id="news_yes" name="news" value="yes"> Да
+            </label>
+            <label for="news_no">
+              <input type="radio" id="news_no" name="news" value="no"> Нет
+            </label>
+          </fieldset>
+
+          <button type="submit" class="btn">Отправить заявку</button>
+
+        </form>
+      </section>
+
+    </main>
+
+    <footer>
+      <p>&copy; 2026 ТЦ «Галерея». Учебный проект — лабораторная работа №2.</p>
+    </footer>
+
+  </body>
+</html>

@@ -1,0 +1,2069 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Редактор кафедры 41</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.css">
+
+<style>
+/* ===================================================================
+   THEME VARIABLES
+   =================================================================== */
+:root{
+  --bg:#f3f5f9; --panel:#ffffff; --panel-2:#f8f9fc; --border:#e2e5ec;
+  --text:#1c2333; --text-2:#5b6478; --text-3:#9aa2b4;
+  --accent:#4f6bfe; --accent-2:#eef1ff; --accent-text:#ffffff;
+  --danger:#ff5470; --ok:#22c07a;
+  --shadow:0 4px 16px rgba(30,40,80,.08);
+  --radius:10px; --radius-sm:6px;
+  --mono:'SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#12141c; --panel:#181b26; --panel-2:#1f2330; --border:#2b3040;
+  --text:#e7e9f2; --text-2:#a4abc0; --text-3:#6b7285;
+  --accent:#7b8dff; --accent-2:#232744; --accent-text:#ffffff;
+  --danger:#ff6b85; --ok:#3ad493;
+  --shadow:0 4px 20px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0; background:var(--bg); color:var(--text); font-family:var(--sans);
+  font-size:13px; display:flex; flex-direction:column; height:100vh; overflow:hidden;
+}
+button{font-family:inherit;cursor:pointer;}
+input,select,textarea,button{font-family:inherit;font-size:12.5px;color:var(--text);}
+input[type=text],input[type=number],select{
+  background:var(--panel-2); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:6px 8px; color:var(--text); width:100%;
+}
+input[type=text]:focus,input[type=number]:focus,select:focus{outline:2px solid var(--accent); outline-offset:-1px;}
+.hidden{display:none !important;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+/* ===================================================================
+   TOPBAR
+   =================================================================== */
+.topbar{
+  display:flex; align-items:center; gap:14px; padding:10px 16px;
+  background:var(--panel); border-bottom:1px solid var(--border); flex:0 0 auto; z-index:50;
+}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;white-space:nowrap;}
+.brand .spark{color:var(--accent);}
+.toolbar-group{display:flex;align-items:center;gap:4px;padding:0 6px;border-right:1px solid var(--border);}
+.toolbar-group:last-of-type{border-right:none;}
+.tbtn{
+  display:flex;align-items:center;gap:6px; background:transparent;border:1px solid transparent;
+  border-radius:var(--radius-sm); padding:7px 10px; color:var(--text-2); font-size:12.5px; white-space:nowrap;
+}
+.tbtn:hover{background:var(--panel-2); color:var(--text); border-color:var(--border);}
+.tbtn:disabled{opacity:.4;cursor:not-allowed;}
+.tbtn:disabled:hover{background:transparent;border-color:transparent;}
+.tbtn svg{width:15px;height:15px;flex:0 0 auto;}
+.topbar-spacer{flex:1;}
+.theme-toggle{display:flex;gap:4px;background:var(--panel-2);border:1px solid var(--border);border-radius:999px;padding:3px;}
+.theme-toggle button{border:none;background:transparent;border-radius:999px;padding:6px 12px;color:var(--text-2);display:flex;align-items:center;gap:6px;font-size:12px;}
+.theme-toggle button.active{background:var(--accent);color:var(--accent-text);}
+.theme-toggle svg{width:13px;height:13px;}
+
+/* ===================================================================
+   WORKSPACE LAYOUT
+   =================================================================== */
+.workspace{flex:1;display:flex;min-height:0;}
+.panel{background:var(--panel);display:flex;flex-direction:column;min-height:0;}
+.panel-left{width:250px;flex:0 0 auto;border-right:1px solid var(--border);}
+.panel-right{width:288px;flex:0 0 auto;border-left:1px solid var(--border);overflow-y:auto;}
+.panel-head{padding:14px 14px 10px;font-weight:700;font-size:13.5px;flex:0 0 auto;}
+.center{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--bg);}
+
+/* ---------- left: components ---------- */
+.search-box{margin:0 14px 12px;position:relative;}
+.search-box input{padding-left:30px;}
+.search-box svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--text-3);}
+.comp-scroll{flex:1;overflow-y:auto;padding:0 14px 16px;}
+.comp-cat{font-size:10.5px;font-weight:700;letter-spacing:.06em;color:var(--text-3);margin:14px 0 8px;}
+.comp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.comp-item{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  padding:10px 4px;cursor:grab;user-select:none;
+}
+.comp-item:hover{border-color:var(--accent);background:var(--accent-2);}
+.comp-item:active{cursor:grabbing;}
+.comp-item .ic{width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:var(--text-2);font-weight:700;font-size:11px;}
+.comp-item .ic svg{width:20px;height:20px;}
+.comp-item .lb{font-size:9.5px;color:var(--text-2);letter-spacing:.02em;text-transform:uppercase;}
+.comp-wide{grid-column:span 3;flex-direction:row;justify-content:center;gap:8px;}
+
+/* ---------- center: canvas toolbar ---------- */
+.canvas-toolbar{
+  display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--panel);
+  border-bottom:1px solid var(--border);flex:0 0 auto;
+}
+.seg{display:flex;background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;}
+.seg button{border:none;background:transparent;padding:7px 9px;color:var(--text-2);display:flex;align-items:center;}
+.seg button+button{border-left:1px solid var(--border);}
+.seg button.active{background:var(--accent);color:var(--accent-text);}
+.seg svg{width:15px;height:15px;}
+.zoom-readout{font-size:12px;color:var(--text-2);min-width:42px;text-align:center;}
+.ct-spacer{flex:1;}
+.grid-toggle{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-2);}
+.switch{position:relative;width:32px;height:18px;background:var(--border);border-radius:999px;cursor:pointer;flex:0 0 auto;}
+.switch::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;background:#fff;border-radius:50%;transition:.15s;box-shadow:0 1px 3px rgba(0,0,0,.3);}
+.switch.on{background:var(--accent);}
+.switch.on::after{left:16px;}
+
+/* ---------- canvas ---------- */
+.canvas-wrap{flex:1;overflow:auto;position:relative;padding:28px;display:flex;justify-content:center;align-items:flex-start;}
+.canvas-frame-outer{position:relative;flex:0 0 auto;}
+.canvas-frame{
+  background:#fff;box-shadow:var(--shadow);border-radius:8px;
+  width:1200px;transition:width .15s ease; position:relative;
+}
+.canvas-frame iframe{width:100%;height:640px;border:0;display:block;background:#fff;border-radius:8px;}
+.canvas-grid-overlay{
+  position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .15s;border-radius:8px;overflow:hidden;
+  background-image:linear-gradient(to right, rgba(79,107,254,.12) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(79,107,254,.12) 1px, transparent 1px);
+  background-size:8px 8px;
+}
+.canvas-grid-overlay.show{opacity:1;}
+.hover-outline,.sel-outline{position:absolute;pointer-events:none;z-index:20;display:none;border-radius:2px;}
+.hover-outline{border:1.5px dashed var(--accent);background:rgba(79,107,254,.06);}
+.sel-outline{border:2px solid var(--accent);box-shadow:0 0 0 2px rgba(79,107,254,.18);}
+.sel-label{
+  position:absolute;top:-22px;left:-2px;background:var(--accent);color:#fff;font-size:10.5px;
+  padding:2px 6px;border-radius:4px 4px 4px 0;white-space:nowrap;font-family:var(--mono);
+}
+.resize-handle{
+  position:absolute;right:-6px;bottom:-6px;width:11px;height:11px;background:var(--accent);
+  border:2px solid #fff;border-radius:3px;pointer-events:all;cursor:nwse-resize;z-index:22;
+}
+.mini-toolbar{
+  position:absolute;top:-36px;left:0;z-index:25;display:flex;gap:2px;background:var(--panel);border:1px solid var(--border);
+  border-radius:8px;box-shadow:var(--shadow);padding:3px;pointer-events:all;
+}
+.mini-toolbar button{border:none;background:transparent;width:26px;height:26px;border-radius:5px;display:flex;align-items:center;justify-content:center;color:var(--text-2);}
+.mini-toolbar button:hover{background:var(--accent-2);color:var(--accent);}
+.mini-toolbar button.danger:hover{background:#ffe4ea;color:var(--danger);}
+.mini-toolbar svg{width:14px;height:14px;}
+.mini-toolbar .drag-handle{cursor:grab;}
+
+/* ---------- code panels ---------- */
+.code-panels{display:flex;height:290px;flex:0 0 auto;border-top:1px solid var(--border);background:var(--panel);}
+.code-pane{flex:1;display:flex;flex-direction:column;min-width:0;}
+.code-pane+.code-pane{border-left:1px solid var(--border);}
+.code-pane-head{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);
+  font-size:11.5px;font-weight:700;color:var(--text-2);flex:0 0 auto;
+}
+.code-pane-head .dot{width:7px;height:7px;border-radius:50%;}
+.dot-html{background:#ff9142;} .dot-css{background:#4f6bfe;}
+.code-pane-head .cp-spacer{flex:1;}
+.code-pane-head button{border:none;background:transparent;color:var(--text-3);padding:3px;border-radius:4px;display:flex;}
+.code-pane-head button:hover{background:var(--panel-2);color:var(--text);}
+.code-pane-head svg{width:13px;height:13px;}
+.code-pane .CodeMirror{flex:1;height:auto !important;font-family:var(--mono);font-size:12.5px;line-height:1.55;}
+.hint-bar{
+  flex:0 0 auto;font-size:11.5px;color:var(--text-2);background:var(--accent-2);border-top:1px solid var(--border);
+  padding:7px 12px;display:none;align-items:flex-start;gap:7px;
+}
+[data-theme="dark"] .hint-bar{background:#1c2140;}
+.hint-bar.show{display:flex;}
+.hint-bar svg{width:14px;height:14px;flex:0 0 auto;color:var(--accent);margin-top:1px;}
+
+/* ===================================================================
+   RIGHT: PROPERTIES
+   =================================================================== */
+.prop-empty{padding:0 14px;color:var(--text-3);font-size:12.5px;line-height:1.6;}
+.prop-body{padding:0 14px 24px;}
+.prop-sel-tag{
+  display:inline-flex;align-items:center;gap:6px;background:var(--accent-2);color:var(--accent);
+  font-family:var(--mono);font-size:11.5px;padding:4px 8px;border-radius:6px;margin-bottom:14px;
+}
+.field{margin-bottom:10px;}
+.field label{display:block;font-size:11px;color:var(--text-2);margin-bottom:4px;}
+.field-row{display:flex;gap:8px;}
+.field-row .field{flex:1;}
+.group{margin-top:18px;padding-top:14px;border-top:1px solid var(--border);}
+.group-title{
+  display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--text);
+  margin-bottom:12px;text-transform:none;
+}
+.group-title svg{width:13px;height:13px;color:var(--text-3);}
+
+/* box model widget */
+.box-model{background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px;}
+.box-model .ring-label{font-size:9px;letter-spacing:.05em;color:var(--text-3);text-align:center;padding:2px 0;}
+.box-grid{
+  display:grid;grid-template-columns:26px 1fr 26px;grid-template-rows:26px auto 26px;gap:2px;align-items:center;
+}
+.box-grid input{
+  width:100%;padding:2px;text-align:center;font-size:10.5px;border-radius:4px;background:var(--panel);
+}
+.box-grid .g-top{grid-column:2;grid-row:1;}
+.box-grid .g-left{grid-column:1;grid-row:2;}
+.box-grid .g-right{grid-column:3;grid-row:2;}
+.box-grid .g-bottom{grid-column:2;grid-row:3;}
+.box-grid .g-center{grid-column:2;grid-row:2;background:var(--panel);border:1px dashed var(--border);border-radius:4px;min-height:40px;}
+
+.icon-group{display:flex;background:var(--panel-2);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;}
+.icon-group button{flex:1;border:none;background:transparent;padding:7px 4px;color:var(--text-2);display:flex;align-items:center;justify-content:center;}
+.icon-group button+button{border-left:1px solid var(--border);}
+.icon-group button.active{background:var(--accent);color:var(--accent-text);}
+.icon-group svg{width:14px;height:14px;}
+
+.color-field{display:flex;align-items:center;gap:8px;}
+.swatch-wrap{position:relative;width:30px;height:30px;flex:0 0 auto;border-radius:6px;overflow:hidden;border:1px solid var(--border);}
+.swatch-wrap input[type=color]{position:absolute;inset:-4px;width:38px;height:38px;border:none;padding:0;cursor:pointer;}
+.color-field input[type=text]{flex:1;}
+.opacity-field{width:64px;flex:0 0 auto;}
+
+.slider-row{display:flex;align-items:center;gap:10px;}
+.slider-row input[type=range]{flex:1;accent-color:var(--accent);}
+.slider-row .sr-val{width:46px;flex:0 0 auto;}
+
+.preset-btn{
+  width:100%;border:1px dashed var(--border);background:transparent;border-radius:var(--radius-sm);
+  padding:8px;color:var(--text-2);font-size:11.5px;margin-top:6px;
+}
+.preset-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* toast */
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(12px);background:var(--text);color:var(--bg);
+  padding:9px 16px;border-radius:8px;font-size:12.5px;box-shadow:var(--shadow);opacity:0;pointer-events:none;
+  transition:.18s;z-index:200;display:flex;align-items:center;gap:8px;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast svg{width:14px;height:14px;color:var(--ok);}
+
+/* CodeMirror tweaks */
+.CodeMirror{background:transparent !important;}
+[data-theme="light"] .cm-src-hi{background:rgba(79,107,254,.14);}
+[data-theme="dark"] .cm-src-hi{background:rgba(123,141,255,.22);}
+</style>
+</head>
+<body data-theme="light">
+
+<!-- ============================== TOPBAR ============================== -->
+<div class="topbar">
+  <div class="brand"><span class="spark">✦</span>Редактор кафедры 41</div>
+  <div class="toolbar-group">
+    <button class="tbtn" id="btnNew" title="Новый проект">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 8v8M8 12h8"/></svg>Новый проект
+    </button>
+    <button class="tbtn" id="btnOpen" title="Открыть файл">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>Открыть
+    </button>
+    <button class="tbtn" id="btnSave" title="Сохранить в браузере">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h11l5 5v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M9 3v6h6V3M7 21v-6h10v6"/></svg>Сохранить
+    </button>
+    <button class="tbtn" id="btnExport" title="Скачать .html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>Экспорт
+    </button>
+    <button class="tbtn" id="btnImport" title="Загрузить .html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V3m0 0 4 4m-4-4-4 4"/><path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>Импорт
+    </button>
+  </div>
+  <div class="toolbar-group">
+    <button class="tbtn" id="btnCopyHtml">Копировать HTML</button>
+    <button class="tbtn" id="btnCopyCss">Копировать CSS</button>
+    <button class="tbtn" id="btnCopyAll">Копировать всё</button>
+    <button class="tbtn" id="btnClear">Очистить</button>
+  </div>
+  <div class="toolbar-group">
+    <button class="tbtn" id="btnUndo" title="Отменить (Ctrl+Z)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 7 4 12l5 5M4 12h11a5 5 0 0 1 0 10h-1"/></svg>Отменить
+    </button>
+    <button class="tbtn" id="btnRedo" title="Повторить (Ctrl+Shift+Z)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 7 20 12l-5 5M20 12H9a5 5 0 0 0 0 10h1"/></svg>Повторить
+    </button>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="theme-toggle">
+    <button id="btnThemeLight" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4"/></svg>Светлая тема</button>
+    <button id="btnThemeDark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>Тёмная тема</button>
+  </div>
+</div>
+
+<!-- ============================== WORKSPACE ============================== -->
+<div class="workspace">
+
+  <!-- ---------- LEFT: components ---------- -->
+  <div class="panel panel-left">
+    <div class="panel-head">Компоненты</div>
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="text" id="compSearch" placeholder="Поиск элементов...">
+    </div>
+    <div class="comp-scroll" id="compScroll"></div>
+  </div>
+
+  <!-- ---------- CENTER: canvas + code ---------- -->
+  <div class="center">
+    <div class="canvas-toolbar">
+      <div class="seg" id="toolSeg">
+        <button class="active" data-tool="select" title="Курсор">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3l14 7-6 2-2 6-6-15z"/></svg>
+        </button>
+        <button data-tool="pan" title="Рука (прокрутка)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 12V6a1.5 1.5 0 0 1 3 0v5m0-4a1.5 1.5 0 0 1 3 0v4m0-2.5a1.5 1.5 0 0 1 3 0V13m0-1a1.5 1.5 0 0 1 3 0v4a6 6 0 0 1-6 6H9a6 6 0 0 1-5-2.7L2 15.4c-.6-1 0-2.4 1.2-2.4.5 0 1 .2 1.3.6L8 17"/></svg>
+        </button>
+      </div>
+      <div class="zoom-readout" id="zoomReadout">100%</div>
+      <button class="tbtn" id="zoomOut" style="padding:6px 8px;">−</button>
+      <button class="tbtn" id="zoomIn" style="padding:6px 8px;">+</button>
+      <div class="seg" id="deviceSeg">
+        <button class="active" data-device="desktop" title="Десктоп">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg>
+        </button>
+        <button data-device="tablet" title="Планшет">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+        <button data-device="mobile" title="Мобильный">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+        </button>
+      </div>
+      <div class="seg" id="alignSeg" title="Быстрое выравнивание выбранного flex-контейнера">
+        <button data-align="flex-start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v16"/><rect x="8" y="6" width="5" height="5"/><rect x="8" y="14" width="9" height="4"/></svg></button>
+        <button data-align="center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16"/><rect x="7" y="7" width="10" height="4"/><rect x="9" y="14" width="6" height="4"/></svg></button>
+        <button data-align="flex-end"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 4v16"/><rect x="7" y="6" width="9" height="5"/><rect x="11" y="14" width="5" height="4"/></svg></button>
+        <button data-align="space-between"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v16M20 4v16"/><rect x="7" y="10" width="4" height="4"/><rect x="13" y="10" width="4" height="4"/></svg></button>
+      </div>
+      <div class="ct-spacer"></div>
+      <div class="grid-toggle">Сетка <div class="switch on" id="gridSwitch"></div></div>
+    </div>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <div class="canvas-frame-outer">
+        <div class="canvas-frame" id="canvasFrame">
+          <iframe id="previewFrame" title="Предпросмотр" sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"></iframe>
+          <div class="canvas-grid-overlay show" id="gridOverlay"></div>
+          <div class="hover-outline" id="hoverOutline"></div>
+          <div class="sel-outline" id="selOutline">
+            <div class="sel-label" id="selLabel"></div>
+            <div class="resize-handle" id="resizeHandle"></div>
+            <div class="mini-toolbar hidden" id="miniToolbar">
+              <button class="drag-handle" id="mtMove" title="Перетащить (изменить порядок)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18M7 7 3 12l4 5M17 7l4 5-4 5M7 17l5 4 5-4M7 7l5-4 5 4"/></svg>
+              </button>
+              <button id="mtDup" title="Дублировать">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+              </button>
+              <button id="mtParent" title="Выделить родителя">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5m0 0-5 5m5-5 5 5"/></svg>
+              </button>
+              <button class="danger" id="mtDel" title="Удалить">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-13"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-panels">
+      <div class="code-pane">
+        <div class="code-pane-head">
+          <span class="dot dot-html"></span>HTML
+          <div class="cp-spacer"></div>
+          <button id="fmtHtml" title="Форматировать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h16"/></svg></button>
+        </div>
+        <textarea id="htmlEditor"></textarea>
+        <div class="hint-bar" id="htmlHintBar"></div>
+      </div>
+      <div class="code-pane">
+        <div class="code-pane-head">
+          <span class="dot dot-css"></span>CSS
+          <div class="cp-spacer"></div>
+          <button id="fmtCss" title="Форматировать"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h16"/></svg></button>
+        </div>
+        <textarea id="cssEditor"></textarea>
+        <div class="hint-bar" id="cssHintBar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- RIGHT: properties ---------- -->
+  <div class="panel panel-right">
+    <div class="panel-head">Свойства</div>
+    <div class="prop-empty" id="propEmpty">Выберите элемент на холсте или в коде, чтобы увидеть и изменить его свойства.</div>
+    <div class="prop-body hidden" id="propBody">
+      <div class="prop-sel-tag" id="propSelTag">div</div>
+
+      <div class="field"><label>ID</label><input type="text" id="pId" data-attr="id"></div>
+      <div class="field"><label>Классы</label><input type="text" id="pClass" data-attr="class"></div>
+
+      <div class="group">
+        <div class="group-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/></svg>Размеры</div>
+        <div class="field-row">
+          <div class="field"><label>W</label><input type="text" id="pWidth" data-prop="width" placeholder="auto"></div>
+          <div class="field"><label>H</label><input type="text" id="pHeight" data-prop="height" placeholder="auto"></div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="1"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg>Отступы</div>
+        <div class="box-model">
+          <div class="ring-label">MARGIN</div>
+          <div class="box-grid">
+            <input class="g-top" id="mTop" data-prop="margin-top" placeholder="0">
+            <input class="g-left" id="mLeft" data-prop="margin-left" placeholder="0">
+            <div class="g-center" style="display:flex;flex-direction:column;">
+              <div class="ring-label">PADDING</div>
+              <div class="box-grid" style="flex:1;">
+                <input class="g-top" id="pTop" data-prop="padding-top" placeholder="0">
+                <input class="g-left" id="pLeft" data-prop="padding-left" placeholder="0">
+                <div class="g-center"></div>
+                <input class="g-right" id="pRight" data-prop="padding-right" placeholder="0">
+                <input class="g-bottom" id="pBottom" data-prop="padding-bottom" placeholder="0">
+              </div>
+            </div>
+            <input class="g-right" id="mRight" data-prop="margin-right" placeholder="0">
+            <input class="g-bottom" id="mBottom" data-prop="margin-bottom" placeholder="0">
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="7" height="14" rx="1"/><rect x="14" y="5" width="7" height="7" rx="1"/><rect x="14" y="15" width="7" height="4" rx="1"/></svg>Отображение</div>
+        <div class="field">
+          <label>Display</label>
+          <select id="pDisplay" data-prop="display">
+            <option value="">по умолчанию</option>
+            <option value="block">block</option>
+            <option value="inline">inline</option>
+            <option value="inline-block">inline-block</option>
+            <option value="flex">flex</option>
+            <option value="inline-flex">inline-flex</option>
+            <option value="grid">grid</option>
+            <option value="none">none</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Direction</label>
+            <div class="icon-group" id="gDirection" data-prop="flex-direction">
+              <button data-value="row" title="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="6" height="10" rx="1"/><rect x="10" y="7" width="6" height="10" rx="1"/><rect x="17" y="7" width="4" height="10" rx="1"/></svg></button>
+              <button data-value="column" title="column"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="3" width="10" height="6" rx="1"/><rect x="7" y="10" width="10" height="6" rx="1"/><rect x="7" y="17" width="10" height="4" rx="1"/></svg></button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Wrap</label>
+            <div class="icon-group" id="gWrap" data-prop="flex-wrap">
+              <button data-value="nowrap" title="nowrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16M14 7l5 5-5 5"/></svg></button>
+              <button data-value="wrap" title="wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8h13M4 16h9M17 4l4 4-4 4"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Justify Content</label>
+          <div class="icon-group" id="gJustify" data-prop="justify-content">
+            <button data-value="flex-start" title="start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v16"/><rect x="7" y="9" width="5" height="6"/><rect x="14" y="9" width="3" height="6"/></svg></button>
+            <button data-value="center" title="center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4v16"/><rect x="8" y="9" width="3" height="6"/><rect x="13" y="9" width="3" height="6"/></svg></button>
+            <button data-value="flex-end" title="end"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 4v16"/><rect x="10" y="9" width="3" height="6"/><rect x="15" y="9" width="3" height="6"/></svg></button>
+            <button data-value="space-between" title="space-between"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v16M20 4v16"/><rect x="7" y="9" width="3" height="6"/><rect x="14" y="9" width="3" height="6"/></svg></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Align Items</label>
+          <div class="icon-group" id="gAlign" data-prop="align-items">
+            <button data-value="stretch" title="stretch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="4" width="5" height="16"/><rect x="14" y="4" width="5" height="16"/></svg></button>
+            <button data-value="flex-start" title="start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16"/><rect x="6" y="7" width="5" height="4"/><rect x="14" y="7" width="5" height="8"/></svg></button>
+            <button data-value="center" title="center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12h16"/><rect x="6" y="9" width="5" height="6"/><rect x="14" y="8" width="5" height="8"/></svg></button>
+            <button data-value="flex-end" title="end"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h16"/><rect x="6" y="13" width="5" height="4"/><rect x="14" y="9" width="5" height="8"/></svg></button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Gap</label>
+          <div class="slider-row">
+            <input type="range" id="pGapRange" min="0" max="64" value="0">
+            <input type="text" class="sr-val" id="pGap" data-prop="gap" placeholder="0px">
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5m0 14h16M4 19l6-6 4 3 6-8"/></svg>Типографика</div>
+        <div class="field-row">
+          <div class="field"><label>Размер</label><input type="text" id="pFontSize" data-prop="font-size" placeholder="16px"></div>
+          <div class="field">
+            <label>Жирность</label>
+            <select id="pFontWeight" data-prop="font-weight">
+              <option value="">по умолчанию</option>
+              <option value="300">300 — light</option>
+              <option value="400">400 — normal</option>
+              <option value="500">500 — medium</option>
+              <option value="600">600 — semibold</option>
+              <option value="700">700 — bold</option>
+              <option value="800">800 — extrabold</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label>Выравнивание текста</label>
+          <div class="icon-group" id="gTextAlign" data-prop="text-align">
+            <button data-value="left" title="left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h13"/></svg></button>
+            <button data-value="center" title="center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M5.5 18h13"/></svg></button>
+            <button data-value="right" title="right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M10 12h10M7 18h13"/></svg></button>
+          </div>
+        </div>
+        <div class="field color-field">
+          <div class="swatch-wrap"><input type="color" id="pColorSwatch" value="#1c2333"></div>
+          <input type="text" id="pColor" data-prop="color" placeholder="#1c2333">
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18"/></svg>Цвет и фон</div>
+        <div class="field color-field">
+          <div class="swatch-wrap"><input type="color" id="pBgSwatch" value="#ffffff"></div>
+          <input type="text" id="pBgHex" placeholder="#ffffff">
+          <input type="text" class="opacity-field" id="pBgAlpha" placeholder="100 %">
+        </div>
+        <div class="field" style="margin-top:12px;">
+          <label>Border Radius</label>
+          <div class="slider-row">
+            <input type="range" id="pRadiusRange" min="0" max="100" value="0">
+            <input type="text" class="sr-val" id="pRadius" data-prop="border-radius" placeholder="0px">
+          </div>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>Граница</div>
+        <div class="field-row">
+          <div class="field"><label>Толщина</label><input type="text" id="pBorderWidth" data-prop="border-width" placeholder="0px"></div>
+          <div class="field">
+            <label>Стиль</label>
+            <select id="pBorderStyle" data-prop="border-style">
+              <option value="">нет</option>
+              <option value="solid">solid</option>
+              <option value="dashed">dashed</option>
+              <option value="dotted">dotted</option>
+            </select>
+          </div>
+        </div>
+        <div class="field color-field">
+          <div class="swatch-wrap"><input type="color" id="pBorderColorSwatch" value="#e2e5ec"></div>
+          <input type="text" id="pBorderColor" data-prop="border-color" placeholder="#e2e5ec">
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="5" width="13" height="13" rx="2"/></svg>Тень</div>
+        <div class="field-row">
+          <div class="field"><label>Смещение X</label><input type="text" id="pShX" placeholder="0px"></div>
+          <div class="field"><label>Смещение Y</label><input type="text" id="pShY" placeholder="4px"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Размытие</label><input type="text" id="pShBlur" placeholder="12px"></div>
+          <div class="field color-field" style="flex:1;">
+            <div class="swatch-wrap" style="width:26px;height:26px;"><input type="color" id="pShColorSwatch" value="#000000"></div>
+            <input type="text" id="pShAlpha" placeholder="15 %">
+          </div>
+        </div>
+        <button class="preset-btn" id="pShPreset">+ Добавить мягкую тень</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fileInput" accept=".html,.htm" class="hidden">
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg><span id="toastText"></span></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closetag.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/show-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/xml-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/html-hint.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/hint/css-hint.min.js"></script>
+
+<script>
+'use strict';
+/* ===================================================================
+   ENGINE  (pure text/DOM helpers — unit-tested standalone before
+   being embedded here; see project notes)
+   =================================================================== */
+const VOID_TAGS = new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);
+
+function elementChildren(node){ return Array.from(node.children || []); }
+
+function findNodeByPath(root, path){
+  let node = root;
+  for (const idx of path){
+    const kids = elementChildren(node);
+    if (idx < 0 || idx >= kids.length) return null;
+    node = kids[idx];
+  }
+  return node;
+}
+
+function assignTempEids(root, prefix){
+  prefix = prefix || 't';
+  function walk(node, path){
+    const kids = elementChildren(node);
+    kids.forEach((el, i) => {
+      const p = path.concat(i);
+      if (!el.hasAttribute('data-el')) el.setAttribute('data-eid', prefix + '-' + p.join('.'));
+      walk(el, p);
+    });
+  }
+  walk(root, []);
+}
+
+function tagNodeAtPath(root, path, newId){
+  const node = findNodeByPath(root, path);
+  if (!node) return false;
+  node.setAttribute('data-el', newId);
+  return true;
+}
+
+function escapeForRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+function findRuleBlock(cssText, selector){
+  const sel = escapeForRegex(selector);
+  const re = new RegExp('(^|[};])\\s*(' + sel + ')\\s*\\{', 'g');
+  let m;
+  while ((m = re.exec(cssText))){
+    const selStart = m.index + m[1].length;
+    const braceOpen = m.index + m[0].length - 1;
+    let depth = 1, i = braceOpen + 1;
+    for (; i < cssText.length; i++){
+      if (cssText[i] === '{') depth++;
+      else if (cssText[i] === '}'){ depth--; if (depth === 0) break; }
+    }
+    if (depth !== 0) return null;
+    return { start: selStart, end: i + 1, bodyStart: braceOpen + 1, bodyEnd: i };
+  }
+  return null;
+}
+
+function parseDeclarations(body){
+  const map = new Map();
+  body.split(';').forEach((chunk) => {
+    const idx = chunk.indexOf(':');
+    if (idx === -1) return;
+    const prop = chunk.slice(0, idx).trim();
+    const val = chunk.slice(idx + 1).trim();
+    if (prop) map.set(prop, val);
+  });
+  return map;
+}
+
+function stringifyDeclarations(map){
+  let out = '';
+  for (const [prop, val] of map){
+    if (val === null || val === undefined || val === '') continue;
+    out += '  ' + prop + ': ' + val + ';\n';
+  }
+  return out;
+}
+
+function getElementRuleProps(cssText, elId){
+  const block = findRuleBlock(cssText, '[data-el="' + elId + '"]');
+  if (!block) return new Map();
+  return parseDeclarations(cssText.slice(block.bodyStart, block.bodyEnd));
+}
+
+function setElementRuleProps(cssText, elId, propsToSet){
+  const selector = '[data-el="' + elId + '"]';
+  const block = findRuleBlock(cssText, selector);
+  let map = block ? parseDeclarations(cssText.slice(block.bodyStart, block.bodyEnd)) : new Map();
+  for (const [prop, val] of Object.entries(propsToSet)){
+    if (val === null || val === undefined || val === '') map.delete(prop);
+    else map.set(prop, val);
+  }
+  const bodyText = '\n' + stringifyDeclarations(map);
+  if (block){
+    if (map.size === 0) return (cssText.slice(0, block.start) + cssText.slice(block.end)).replace(/\n{3,}/g, '\n\n');
+    return cssText.slice(0, block.bodyStart) + bodyText + cssText.slice(block.bodyEnd);
+  } else {
+    if (map.size === 0) return cssText;
+    const trimmed = cssText.replace(/\s+$/, '');
+    const sep = trimmed.length ? '\n\n' : '';
+    return trimmed + sep + selector + ' {' + bodyText + '}\n';
+  }
+}
+
+function removeElementRule(cssText, elId){
+  const block = findRuleBlock(cssText, '[data-el="' + elId + '"]');
+  if (!block) return cssText;
+  return (cssText.slice(0, block.start) + cssText.slice(block.end)).replace(/\n{3,}/g, '\n\n');
+}
+
+function stripDataAttrs(html){
+  return html.replace(/\s+data-el="[^"]*"/g, '').replace(/\s+data-eid="[^"]*"/g, '');
+}
+
+const TAG_RE = /<!--[\s\S]*?-->|<\/?([a-zA-Z][a-zA-Z0-9-]*)((?:"[^"]*"|'[^']*'|[^"'>])*?)\/?>/g;
+
+function tokenizeTags(html){
+  const tokens = [];
+  let m;
+  TAG_RE.lastIndex = 0;
+  while ((m = TAG_RE.exec(html))){
+    const full = m[0];
+    if (full.startsWith('<!--')) continue;
+    const tag = m[1];
+    const isClose = full[1] === '/';
+    const isSelfClose = (/\/>\s*$/.test(full) || VOID_TAGS.has(tag.toLowerCase())) && !isClose;
+    tokens.push({ tag: tag.toLowerCase(), isClose, isSelfClose, start: m.index, end: m.index + full.length, raw: full });
+  }
+  return tokens;
+}
+
+function elementAtOffset(html, offset){
+  const tokens = tokenizeTags(html);
+  const stack = [];
+  for (const t of tokens){
+    if (t.start > offset) break;
+    if (t.isClose){
+      for (let i = stack.length - 1; i >= 0; i--){
+        if (stack[i].tag === t.tag){ stack.splice(i, 1); break; }
+      }
+    } else {
+      const dm = /data-el="([^"]+)"/.exec(t.raw);
+      const entry = { tag: t.tag, start: t.start, end: t.end, dataEl: dm ? dm[1] : null };
+      if (!t.isSelfClose) stack.push(entry);
+      else if (t.start <= offset && offset <= t.end) stack.push(entry);
+    }
+  }
+  return stack.length ? stack[stack.length - 1] : null;
+}
+
+function findElementRangeById(html, elId){
+  const tokens = tokenizeTags(html);
+  let openTok = null;
+  for (const t of tokens){
+    if (t.isClose) continue;
+    if (new RegExp('data-el="' + escapeForRegex(elId) + '"').test(t.raw)){ openTok = t; break; }
+  }
+  if (!openTok) return null;
+  if (openTok.isSelfClose) return { start: openTok.start, end: openTok.end, openEnd: openTok.end };
+  let depth = 1;
+  const idx = tokens.indexOf(openTok);
+  for (let i = idx + 1; i < tokens.length; i++){
+    const t = tokens[i];
+    if (t.tag !== openTok.tag) continue;
+    if (t.isSelfClose) continue;
+    if (!t.isClose) depth++;
+    else { depth--; if (depth === 0) return { start: openTok.start, end: t.end, openEnd: openTok.end }; }
+  }
+  return { start: openTok.start, end: openTok.end, openEnd: openTok.end };
+}
+
+function setOpenTagAttr(html, elId, attrName, attrValue){
+  const range = findElementRangeById(html, elId);
+  if (!range) return html;
+  const openTagText = html.slice(range.start, range.openEnd);
+  const attrRe = new RegExp('\\s' + attrName + '="[^"]*"');
+  let newOpenTag;
+  if (attrValue === '' || attrValue === null || attrValue === undefined){
+    newOpenTag = openTagText.replace(attrRe, '');
+  } else if (attrRe.test(openTagText)){
+    newOpenTag = openTagText.replace(attrRe, ' ' + attrName + '="' + String(attrValue).replace(/"/g, '&quot;') + '"');
+  } else {
+    newOpenTag = openTagText.replace(/^(<[a-zA-Z][a-zA-Z0-9-]*)/, '$1 ' + attrName + '="' + String(attrValue).replace(/"/g, '&quot;') + '"');
+  }
+  return html.slice(0, range.start) + newOpenTag + html.slice(range.openEnd);
+}
+
+function getOpenTagAttr(html, elId, attrName){
+  const range = findElementRangeById(html, elId);
+  if (!range) return '';
+  const openTagText = html.slice(range.start, range.openEnd);
+  const m = new RegExp('\\s' + attrName + '="([^"]*)"').exec(openTagText);
+  return m ? m[1] : '';
+}
+
+function deleteElementById(html, elId){
+  const range = findElementRangeById(html, elId);
+  if (!range) return html;
+  return (html.slice(0, range.start) + html.slice(range.end)).replace(/\n{3,}/g, '\n\n');
+}
+
+function duplicateElementById(html, elId){
+  const range = findElementRangeById(html, elId);
+  if (!range) return { html, ok: false };
+  const original = html.slice(range.start, range.end);
+  const copy = stripDataAttrs(original);
+  return { html: html.slice(0, range.end) + copy + html.slice(range.end), ok: true };
+}
+
+function insertSnippetInto(doc, html, targetElId, snippetHtml){
+  const rootTpl = doc.createElement('template');
+  rootTpl.innerHTML = html;
+  let target = null;
+  if (targetElId) target = rootTpl.content.querySelector('[data-el="' + targetElId + '"]');
+  const snippetTpl = doc.createElement('template');
+  snippetTpl.innerHTML = snippetHtml;
+  const nodes = Array.from(snippetTpl.content.childNodes);
+  if (target) nodes.forEach((n) => target.appendChild(n));
+  else nodes.forEach((n) => rootTpl.content.appendChild(n));
+  return rootTpl.innerHTML;
+}
+
+function moveElementRelative(html, elId, direction){
+  // direction: -1 = swap with previous sibling element, +1 = swap with next
+  const tpl = document.createElement('template');
+  tpl.innerHTML = html;
+  const el = tpl.content.querySelector('[data-el="' + elId + '"]');
+  if (!el || !el.parentNode) return html;
+  if (direction < 0){
+    let sib = el.previousElementSibling;
+    if (!sib) return html;
+    el.parentNode.insertBefore(el, sib);
+  } else {
+    let sib = el.nextElementSibling;
+    if (!sib) return html;
+    el.parentNode.insertBefore(sib, el);
+  }
+  return tpl.innerHTML;
+}
+
+function findParentElId(html, elId){
+  const tpl = document.createElement('template');
+  tpl.innerHTML = html;
+  const el = tpl.content.querySelector('[data-el="' + elId + '"]');
+  if (!el || !el.parentElement) return null;
+  const parent = el.parentElement;
+  if (parent.hasAttribute && parent.hasAttribute('data-el')) return parent.getAttribute('data-el');
+  return { needsTag: true, parent };
+}
+
+/* ===================================================================
+   CSS TEACHING DICTIONARY
+   =================================================================== */
+const CSS_HINTS = {
+  'display:flex': 'Элемент становится flex-контейнером — дочерние элементы выстраиваются вдоль главной оси (по умолчанию слева направо).',
+  'display:inline-flex': 'То же, что flex, но сам контейнер ведёт себя как строчный элемент, не занимая всю ширину.',
+  'display:grid': 'Элемент становится grid-контейнером — дочерние элементы располагаются по строкам и колонкам сетки.',
+  'display:block': 'Элемент занимает всю доступную ширину и начинается с новой строки.',
+  'display:inline': 'Элемент ведёт себя как часть текста — не переносится на новую строку, ширину/высоту задать нельзя.',
+  'display:inline-block': 'Элемент течёт как строчный, но при этом можно задать ширину и высоту.',
+  'display:none': 'Элемент полностью убирается со страницы, не занимает места.',
+  'display': 'Определяет, как элемент участвует в раскладке страницы.',
+  'justify-content:center': 'Дочерние элементы будут выровнены по центру главной оси.',
+  'justify-content:flex-start': 'Дочерние элементы прижимаются к началу главной оси.',
+  'justify-content:flex-end': 'Дочерние элементы прижимаются к концу главной оси.',
+  'justify-content:space-between': 'Первый и последний элемент — по краям, остальное пространство распределяется поровну между элементами.',
+  'justify-content:space-around': 'Вокруг каждого элемента появляется одинаковый отступ.',
+  'justify-content': 'Выравнивает дочерние элементы вдоль главной оси flex/grid-контейнера.',
+  'align-items:center': 'Дочерние элементы выравниваются по центру поперечной оси.',
+  'align-items:stretch': 'Дочерние элементы растягиваются на всю высоту (или ширину) контейнера.',
+  'align-items': 'Выравнивает дочерние элементы вдоль поперечной оси flex/grid-контейнера.',
+  'flex-direction:column': 'Дочерние элементы выстраиваются друг под другом (главная ось — вертикальная).',
+  'flex-direction:row': 'Дочерние элементы выстраиваются слева направо (главная ось — горизонтальная).',
+  'flex-direction': 'Задаёт направление главной оси flex-контейнера.',
+  'flex-wrap:wrap': 'Если элементы не помещаются в одну линию, они переносятся на следующую.',
+  'flex-wrap': 'Разрешает или запрещает перенос дочерних элементов на новую строку.',
+  'gap': 'Между всеми дочерними элементами появится одинаковое расстояние — без лишних margin на каждом элементе.',
+  'padding': 'Внутренний отступ — расстояние между границей элемента и его содержимым.',
+  'margin': 'Внешний отступ — расстояние между элементом и его соседями.',
+  'border-radius': 'Скругляет углы элемента. Значение 50% превращает квадрат в круг.',
+  'box-shadow': 'Добавляет тень вокруг элемента: смещение по X и Y, размытие и цвет.',
+  'border': 'Задаёт видимую рамку вокруг элемента: толщину, стиль линии и цвет.',
+  'color': 'Задаёт цвет текста внутри элемента.',
+  'background-color': 'Задаёт цвет фона элемента.',
+  'font-size': 'Определяет размер текста внутри элемента.',
+  'font-weight': 'Определяет насыщенность (жирность) шрифта.',
+  'text-align': 'Выравнивает текст внутри элемента по горизонтали.',
+  'position:absolute': 'Элемент вынимается из обычного потока и позиционируется относительно ближайшего предка с position, отличным от static.',
+  'position:relative': 'Элемент остаётся в потоке, но становится точкой отсчёта для потомков с position: absolute.',
+  'position': 'Меняет способ позиционирования элемента на странице.',
+  'grid-template-columns': 'Задаёт количество и ширину колонок grid-сетки.',
+  'transition': 'Плавно анимирует изменение указанных CSS-свойств вместо мгновенного скачка.',
+  'transform': 'Позволяет сдвигать, вращать и масштабировать элемент без влияния на раскладку соседей.',
+  'width': 'Задаёт ширину элемента.',
+  'height': 'Задаёт высоту элемента.',
+  'opacity': 'Управляет прозрачностью всего элемента, включая содержимое.',
+  'z-index': 'Определяет порядок наложения элементов друг на друга по глубине.',
+  'overflow': 'Определяет, что делать с содержимым, которое не помещается в границы элемента.',
+  'cursor': 'Задаёт форму курсора мыши при наведении на элемент.'
+};
+
+const HTML_HINTS = {
+  div: '<div> — универсальный блочный контейнер без собственного смысла. Используется для группировки и разметки.',
+  span: '<span> — универсальный строчный контейнер, не переносит строку. Удобен для стилизации части текста.',
+  section: '<section> — тематический раздел страницы (обычно с собственным заголовком).',
+  header: '<header> — шапка страницы или раздела: логотип, навигация, заголовок.',
+  footer: '<footer> — подвал страницы или раздела: копирайт, ссылки, контакты.',
+  nav: '<nav> — блок навигационных ссылок.',
+  main: '<main> — основной уникальный контент страницы. Должен быть один на странице.',
+  aside: '<aside> — второстепенный контент: сайдбар, врезка, реклама.',
+  article: '<article> — самостоятельный, независимо распространяемый фрагмент контента (статья, пост, карточка товара).',
+  h1: '<h1> — заголовок первого уровня, главный заголовок страницы. Обычно один на странице.',
+  h2: '<h2> — заголовок второго уровня, заголовок крупного раздела.',
+  h3: '<h3> — заголовок третьего уровня, заголовок подраздела.',
+  p: '<p> — абзац текста.',
+  a: '<a> — ссылка. Атрибут href обязателен, иначе элемент не кликабелен как ссылка.',
+  img: '<img> — изображение. src — путь к файлу, alt — обязателен для доступности и подставляется, если картинка не загрузилась.',
+  button: '<button> — кликабельная кнопка. type="submit" отправляет форму, type="button" — ничего не делает сам по себе.',
+  input: '<input> — поле ввода. Тип задаётся атрибутом type (text, email, password, checkbox, radio и т.д.).',
+  label: '<label> — подпись поля формы. Атрибут for должен совпадать с id связанного поля.',
+  form: '<form> — форма для сбора данных пользователя.',
+  ul: '<ul> — маркированный (ненумерованный) список.',
+  ol: '<ol> — нумерованный список.',
+  li: '<li> — пункт списка, должен находиться внутри <ul> или <ol>.',
+  table: '<table> — таблица. Строки — <tr>, заголовки ячеек — <th>, обычные ячейки — <td>.',
+  svg: '<svg> — векторная графика, описывается вложенными фигурами (circle, rect, path...).',
+  video: '<video> — встроенное видео. Атрибут controls добавляет панель управления.',
+  textarea: '<textarea> — многострочное текстовое поле.',
+};
+
+function lookupHtmlHint(tag){ return HTML_HINTS[tag] || null; }
+
+function lookupHint(prop, value){
+  const key1 = prop + ':' + (value || '').trim();
+  if (CSS_HINTS[key1]) return CSS_HINTS[key1];
+  if (CSS_HINTS[prop]) return CSS_HINTS[prop];
+  return null;
+}
+
+/* ===================================================================
+   COMPONENT PALETTE
+   =================================================================== */
+const ICONS = {
+  box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="14" rx="1.5"/><path d="M4 10h16"/></svg>',
+  link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 15l6-6M8 13l-2 2a3 3 0 1 0 4 4l2-2M16 11l2-2a3 3 0 1 0-4-4l-2 2"/></svg>',
+  image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="1.5"/><circle cx="9" cy="10" r="1.7"/><path d="M21 16l-6-5-4 4-2-2-6 6"/></svg>',
+  video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="14" height="14" rx="1.5"/><path d="M17 10l4-2.5v9L17 14"/></svg>',
+  list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="5" cy="6" r="1"/><circle cx="5" cy="12" r="1"/><circle cx="5" cy="18" r="1"/><path d="M9 6h11M9 12h11M9 18h11"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 12l3 3 5-6"/></svg>',
+  lines: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M7 9h10M7 13h6"/></svg>',
+  tag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 3H4v7l10 10 7-7L11 3z"/><circle cx="8" cy="8" r="1.2"/></svg>',
+  btn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="8" rx="4"/></svg>',
+  grid2: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>',
+  cols: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="10" y="4" width="5" height="16" rx="1"/><rect x="17" y="4" width="4" height="16" rx="1"/></svg>',
+  svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="8" r="3"/><path d="M14 20l4-10 4 10M15 17h6"/></svg>',
+  canvas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M3 15l5-5 4 4 5-7 4 4"/></svg>',
+  table: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 10h18M9 4v16"/></svg>',
+};
+function textIcon(t){ return '<span>' + t + '</span>'; }
+
+function boxDefault(){ return { 'min-height': '60px', 'border': '1px dashed var(--comp-border, #c7cde0)', 'padding': '12px' }; }
+
+const COMPONENTS = [
+  { key:'div', label:'DIV', cat:'ОСНОВНЫЕ', icon:ICONS.box, container:true,
+    html:id => `<div data-el="${id}">Блок</div>`, css:{ 'min-height':'50px', 'padding':'12px', 'border':'1px dashed #c7cde0' } },
+  { key:'section', label:'SECTION', cat:'ОСНОВНЫЕ', icon:ICONS.box, container:true,
+    html:id => `<section data-el="${id}">\n  <p>Новая секция</p>\n</section>`, css:{ 'padding':'24px', 'border':'1px dashed #c7cde0' } },
+  { key:'header', label:'HEADER', cat:'ОСНОВНЫЕ', icon:ICONS.box, container:true,
+    html:id => `<header data-el="${id}">Шапка сайта</header>`, css:{ 'padding':'16px', 'border':'1px dashed #c7cde0' } },
+  { key:'footer', label:'FOOTER', cat:'ОСНОВНЫЕ', icon:ICONS.box, container:true,
+    html:id => `<footer data-el="${id}">© 2026</footer>`, css:{ 'padding':'16px', 'border':'1px dashed #c7cde0' } },
+  { key:'nav', label:'NAV', cat:'ОСНОВНЫЕ', icon:ICONS.box, container:true,
+    html:id => `<nav data-el="${id}"><a href="#">Ссылка</a></nav>`, css:{ 'padding':'10px', 'border':'1px dashed #c7cde0' } },
+  { key:'main', label:'MAIN', cat:'ОСНОВНЫЕ', icon:ICONS.box, container:true,
+    html:id => `<main data-el="${id}">Основной контент</main>`, css:{ 'padding':'24px', 'border':'1px dashed #c7cde0' } },
+  { key:'aside', label:'ASIDE', cat:'ОСНОВНЫЕ', icon:ICONS.box, container:true,
+    html:id => `<aside data-el="${id}">Боковая панель</aside>`, css:{ 'padding':'16px', 'border':'1px dashed #c7cde0' } },
+  { key:'article', label:'ARTICLE', cat:'ОСНОВНЫЕ', icon:ICONS.box, container:true,
+    html:id => `<article data-el="${id}">Статья</article>`, css:{ 'padding':'16px', 'border':'1px dashed #c7cde0' } },
+  { key:'h1', label:'H1', cat:'ОСНОВНЫЕ', icon:textIcon('H1'), container:false,
+    html:id => `<h1 data-el="${id}">Заголовок H1</h1>`, css:null },
+  { key:'h2', label:'H2', cat:'ОСНОВНЫЕ', icon:textIcon('H2'), container:false,
+    html:id => `<h2 data-el="${id}">Заголовок H2</h2>`, css:null },
+  { key:'h3', label:'H3', cat:'ОСНОВНЫЕ', icon:textIcon('H3'), container:false,
+    html:id => `<h3 data-el="${id}">Заголовок H3</h3>`, css:null },
+  { key:'p', label:'P', cat:'ОСНОВНЫЕ', icon:textIcon('¶'), container:false,
+    html:id => `<p data-el="${id}">Текст абзаца.</p>`, css:null },
+  { key:'span', label:'SPAN', cat:'ОСНОВНЫЕ', icon:textIcon('{ }'), container:false,
+    html:id => `<span data-el="${id}">текст</span>`, css:null },
+  { key:'button', label:'BUTTON', cat:'ОСНОВНЫЕ', icon:ICONS.btn, container:false,
+    html:id => `<button data-el="${id}">Кнопка</button>`, css:{ 'padding':'8px 16px', 'border-radius':'8px', 'border':'none', 'background-color':'#4f6bfe', 'color':'#ffffff', 'cursor':'pointer' } },
+  { key:'input', label:'INPUT', cat:'ОСНОВНЫЕ', icon:ICONS.lines, container:false,
+    html:id => `<input data-el="${id}" type="text" placeholder="Введите текст">`, css:{ 'padding':'8px 10px', 'border-radius':'6px', 'border-width':'1px', 'border-style':'solid', 'border-color':'#c7cde0' } },
+  { key:'textarea', label:'TEXTAREA', cat:'ОСНОВНЫЕ', icon:ICONS.lines, container:false,
+    html:id => `<textarea data-el="${id}" placeholder="Текст..."></textarea>`, css:{ 'padding':'8px 10px', 'border-radius':'6px', 'border-width':'1px', 'border-style':'solid', 'border-color':'#c7cde0' } },
+  { key:'label', label:'LABEL', cat:'ОСНОВНЫЕ', icon:ICONS.tag, container:false,
+    html:id => `<label data-el="${id}">Подпись</label>`, css:null },
+  { key:'img', label:'IMG', cat:'МЕДИА', icon:ICONS.image, container:false,
+    html:id => `<img data-el="${id}" src="https://placehold.co/320x200/eef1ff/4f6bfe?text=Изображение" alt="изображение">`, css:{ 'border-radius':'8px' } },
+  { key:'a', label:'A', cat:'ОСНОВНЫЕ', icon:ICONS.link, container:false,
+    html:id => `<a data-el="${id}" href="#">Ссылка</a>`, css:{ color:'#4f6bfe' } },
+  { key:'video', label:'VIDEO', cat:'МЕДИА', icon:ICONS.video, container:false,
+    html:id => `<video data-el="${id}" controls></video>`, css:{ width:'320px', height:'180px', 'background-color':'#000000', 'border-radius':'8px' } },
+  { key:'ul', label:'UL', cat:'СПИСКИ', icon:ICONS.list, container:true,
+    html:id => `<ul data-el="${id}">\n  <li>Пункт 1</li>\n  <li>Пункт 2</li>\n</ul>`, css:null },
+  { key:'ol', label:'OL', cat:'СПИСКИ', icon:ICONS.list, container:true,
+    html:id => `<ol data-el="${id}">\n  <li>Первый</li>\n  <li>Второй</li>\n</ol>`, css:null },
+  { key:'li', label:'LI', cat:'СПИСКИ', icon:ICONS.list, container:false,
+    html:id => `<li data-el="${id}">Пункт списка</li>`, css:null },
+  { key:'svg', label:'SVG', cat:'МЕДИА', icon:ICONS.svg, container:false,
+    html:id => `<svg data-el="${id}" width="48" height="48" viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="#4f6bfe"/></svg>`, css:null },
+  { key:'canvas', label:'CANVAS', cat:'МЕДИА', icon:ICONS.canvas, container:false,
+    html:id => `<canvas data-el="${id}" width="220" height="140"></canvas>`, css:{ 'border-width':'1px', 'border-style':'dashed', 'border-color':'#c7cde0' } },
+  { key:'table', label:'TABLE', cat:'ДРУГОЕ', icon:ICONS.table, container:true,
+    html:id => `<table data-el="${id}">\n  <thead><tr><th>Заголовок 1</th><th>Заголовок 2</th></tr></thead>\n  <tbody><tr><td>Ячейка 1</td><td>Ячейка 2</td></tr></tbody>\n</table>`, css:{ 'border-collapse':'collapse', width:'100%' } },
+  { key:'form', label:'FORM', cat:'ДРУГОЕ', icon:ICONS.lines, container:true,
+    html:id => `<form data-el="${id}">\n  <label>Имя</label>\n  <input type="text" placeholder="Ваше имя">\n  <button type="submit">Отправить</button>\n</form>`, css:{ display:'flex', 'flex-direction':'column', gap:'10px', padding:'16px', 'border-width':'1px', 'border-style':'solid', 'border-color':'#e2e5ec', 'border-radius':'10px' } },
+  { key:'card', label:'CARD', cat:'ДРУГОЕ', icon:ICONS.grid2, container:true,
+    html:id => `<div data-el="${id}" class="card">\n  <h3>Заголовок карточки</h3>\n  <p>Описание карточки.</p>\n</div>`, css:{ padding:'20px', 'border-radius':'12px', 'border-width':'1px', 'border-style':'solid', 'border-color':'#e2e5ec', 'background-color':'#ffffff', 'box-shadow':'0px 4px 16px rgba(20,30,60,0.08)' } },
+  { key:'grid', label:'GRID', cat:'ДРУГОЕ', icon:ICONS.grid2, container:true, wide:true,
+    html:id => `<div data-el="${id}">\n  <div>1</div>\n  <div>2</div>\n  <div>3</div>\n</div>`, css:{ display:'grid', 'grid-template-columns':'repeat(3, 1fr)', gap:'16px' } },
+  { key:'flex', label:'FLEX', cat:'ДРУГОЕ', icon:ICONS.cols, container:true, wide:true,
+    html:id => `<div data-el="${id}">\n  <div>Flex 1</div>\n  <div>Flex 2</div>\n  <div>Flex 3</div>\n</div>`, css:{ display:'flex', gap:'16px' } },
+  { key:'container', label:'CONTAINER', cat:'ДРУГОЕ', icon:ICONS.box, container:true, wide:true,
+    html:id => `<div data-el="${id}"></div>`, css:{ 'min-height':'80px', padding:'16px', 'border-width':'1px', 'border-style':'dashed', 'border-color':'#c7cde0', 'border-radius':'6px' } },
+];
+
+/* ===================================================================
+   DEFAULT STARTER PROJECT
+   =================================================================== */
+const DEFAULT_HTML = `<header class="site-header">
+  <div class="logo">✦ StudyFlow</div>
+  <nav class="nav">
+    <a href="#">Главная</a>
+    <a href="#">Курсы</a>
+    <a href="#">Профессии</a>
+    <a href="#">О нас</a>
+    <a href="#">Контакты</a>
+  </nav>
+  <button class="btn btn-primary">Начать обучение</button>
+</header>
+
+<section class="hero">
+  <div class="hero-content">
+    <span class="badge">Онлайн-курсы</span>
+    <h1>Учись. Практикуй.<br>Создавай будущее.</h1>
+    <p class="hero-text">Интерактивная платформа для изучения веб-разработки. Практические задания, визуальный редактор и реальный код — всё в одном месте.</p>
+    <div class="hero-buttons">
+      <button class="btn btn-primary">Начать бесплатно</button>
+      <button class="btn btn-secondary">Смотреть курсы</button>
+    </div>
+  </div>
+  <div class="hero-image">
+    <div class="hero-card"></div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="feature-card">
+    <div class="feature-icon">🎨</div>
+    <h3>Визуальный редактор</h3>
+    <p>Создавай сайты мышкой и смотри, как меняется код в реальном времени.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">⌨️</div>
+    <h3>HTML и CSS</h3>
+    <p>Генерируй чистый, понятный код и изучай его на практике.</p>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🎓</div>
+    <h3>Учись легко</h3>
+    <p>Понятные объяснения, примеры и интерактивные подсказки.</p>
+  </div>
+</section>`;
+
+const DEFAULT_CSS = `* { box-sizing: border-box; }
+body { margin: 0; font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: #1c2333; }
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 48px;
+  border-bottom: 1px solid #eef0f5;
+}
+.logo { font-weight: 700; font-size: 18px; }
+.nav { display: flex; gap: 28px; }
+.nav a { color: #444b5e; text-decoration: none; font-size: 14px; }
+
+.btn { border: none; border-radius: 8px; padding: 10px 20px; font-size: 14px; cursor: pointer; }
+.btn-primary { background-color: #22c07a; color: #ffffff; }
+.btn-secondary { background-color: #f1f3f9; color: #1c2333; }
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 80px 60px;
+  background: linear-gradient(135deg, #eef8fc 0%, #ffffff 100%);
+  gap: 40px;
+}
+.hero-content { max-width: 600px; }
+.badge {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #e3f6eb;
+  color: #0aa68a;
+  border-radius: 50px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+.hero h1 { font-size: 42px; line-height: 1.2; margin: 0 0 16px; }
+.hero-text { color: #5b6478; font-size: 16px; line-height: 1.6; margin-bottom: 16px; }
+.hero-buttons { display: flex; gap: 16px; }
+
+.hero-image { flex: 0 0 auto; }
+.hero-card {
+  width: 260px;
+  height: 200px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #a7e8de 0%, #cfeee8 100%);
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  padding: 0 60px 80px;
+}
+.feature-card {
+  padding: 28px;
+  border: 1px solid #eef0f5;
+  border-radius: 16px;
+}
+.feature-icon { font-size: 28px; margin-bottom: 12px; }
+.feature-card h3 { margin: 0 0 8px; font-size: 16px; }
+.feature-card p { margin: 0; color: #5b6478; font-size: 13.5px; line-height: 1.5; }
+`;
+
+/* ===================================================================
+   APP STATE
+   =================================================================== */
+const state = {
+  html: DEFAULT_HTML,
+  css: DEFAULT_CSS,
+  selectedId: null,
+  pendingSelectId: null,
+  elCounter: 1,
+  history: [],
+  historyIndex: -1,
+  theme: 'light',
+  device: 'desktop',
+  zoom: 100,
+  tool: 'select',
+};
+
+let programmatic = false;   // guards CodeMirror change handler against our own setValue calls
+let renderDebounce = null;
+let historyDebounce = null;
+let dragState = null;       // active move-drag info
+let resizeState = null;     // active resize-drag info
+
+/* ===================================================================
+   CODEMIRROR SETUP
+   =================================================================== */
+const htmlEditor = CodeMirror.fromTextArea(document.getElementById('htmlEditor'), {
+  mode: 'htmlmixed', lineNumbers: true, lineWrapping: true, styleActiveLine: true,
+  matchBrackets: true, autoCloseBrackets: true, autoCloseTags: true, tabSize: 2, indentUnit: 2,
+  extraKeys: { 'Ctrl-Space': 'autocomplete' },
+});
+const cssEditor = CodeMirror.fromTextArea(document.getElementById('cssEditor'), {
+  mode: 'css', lineNumbers: true, lineWrapping: true, styleActiveLine: true,
+  matchBrackets: true, autoCloseBrackets: true, tabSize: 2, indentUnit: 2,
+  extraKeys: { 'Ctrl-Space': 'autocomplete' },
+});
+htmlEditor.setValue(state.html);
+cssEditor.setValue(state.css);
+
+function setEditorsTheme(theme){
+  const cmTheme = theme === 'dark' ? 'material-darker' : 'default';
+  htmlEditor.setOption('theme', cmTheme);
+  cssEditor.setOption('theme', cmTheme);
+}
+
+let htmlHighlightMark = null;
+let cssHighlightMark = null;
+
+/* ===================================================================
+   RENDER PIPELINE
+   =================================================================== */
+const previewFrame = document.getElementById('previewFrame');
+const hoverOutline = document.getElementById('hoverOutline');
+const selOutline = document.getElementById('selOutline');
+const selLabel = document.getElementById('selLabel');
+const miniToolbar = document.getElementById('miniToolbar');
+const canvasWrap = document.getElementById('canvasWrap');
+const canvasFrame = document.getElementById('canvasFrame');
+
+const RESET_CSS = `html,body{margin:0;padding:0;} *{box-sizing:border-box;} img,video{max-width:100%;}`;
+
+function buildRenderDoc(){
+  const tpl = document.createElement('template');
+  tpl.innerHTML = state.html;
+  assignTempEids(tpl.content);
+  return '<!doctype html><html><head><meta charset="utf-8">' +
+    '<style>' + RESET_CSS + '\n' + state.css + '</style></head><body>' +
+    tpl.innerHTML + '</body></html>';
+}
+
+function scheduleRender(delay){
+  clearTimeout(renderDebounce);
+  renderDebounce = setTimeout(render, delay == null ? 220 : delay);
+}
+
+function render(){
+  try {
+    previewFrame.srcdoc = buildRenderDoc();
+  } catch (e){
+    console.error('render error', e);
+  }
+}
+
+previewFrame.addEventListener('load', onFrameLoad);
+
+function liveDoc(){
+  try { return previewFrame.contentDocument; } catch (e){ return null; }
+}
+
+function onFrameLoad(){
+  const doc = liveDoc();
+  if (!doc || !doc.body) return;
+
+  doc.addEventListener('mouseover', onCanvasHover, true);
+  doc.addEventListener('mouseout', onCanvasHoverOut, true);
+  doc.addEventListener('click', onCanvasClick, true);
+  doc.addEventListener('mousedown', (e) => { if (e.button === 0) e.preventDefault(); }, true);
+
+  if (state.pendingSelectId){
+    const id = state.pendingSelectId;
+    state.pendingSelectId = null;
+    if (doc.querySelector('[data-el="' + id + '"]')) selectPermanent(id);
+    else clearSelection();
+  } else if (state.selectedId){
+    if (doc.querySelector('[data-el="' + state.selectedId + '"]')) resyncSelectionOverlay();
+    else clearSelection();
+  }
+}
+
+function nearestTagged(el){
+  while (el && el.nodeType === 1){
+    if (el.hasAttribute && (el.hasAttribute('data-el') || el.hasAttribute('data-eid'))) return el;
+    el = el.parentElement;
+  }
+  return null;
+}
+
+function onCanvasHover(e){
+  const el = nearestTagged(e.target);
+  if (!el || (state.selectedId && el.getAttribute('data-el') === state.selectedId)){
+    hoverOutline.style.display = 'none';
+    return;
+  }
+  positionOverlay(hoverOutline, el);
+  hoverOutline.style.display = 'block';
+}
+function onCanvasHoverOut(){ hoverOutline.style.display = 'none'; }
+
+function onCanvasClick(e){
+  e.preventDefault();
+  e.stopPropagation();
+  const el = nearestTagged(e.target);
+  if (!el) { clearSelection(); return; }
+  selectFromLiveElement(el);
+}
+
+/* Handles both already-tagged (data-el) and not-yet-tagged (data-eid) elements. */
+function selectFromLiveElement(liveEl){
+  if (liveEl.hasAttribute('data-el')){
+    selectPermanent(liveEl.getAttribute('data-el'));
+    return;
+  }
+  const eid = liveEl.getAttribute('data-eid');
+  if (!eid) return;
+  const path = eid.replace(/^t-/, '').split('.').map(Number);
+  const newId = 'el' + (state.elCounter++);
+  const cleanTpl = document.createElement('template');
+  cleanTpl.innerHTML = state.html;
+  const ok = tagNodeAtPath(cleanTpl.content, path, newId);
+  if (!ok) return;
+  state.html = cleanTpl.innerHTML;
+  programmaticSet(htmlEditor, state.html);
+  state.pendingSelectId = newId;
+  render();
+  pushHistory(true);
+}
+
+/* The iframe sits flush (no padding/border/margin) at the top-left of #canvasFrame,
+   and hover-outline / sel-outline are position:absolute children of that SAME
+   #canvasFrame. That means an element's rect as reported *inside* the iframe
+   (iframe-local pixels, unaffected by any outer zoom transform) is already in
+   exactly the right coordinate space to use directly as the overlay's left/top/
+   width/height -- no cross-container math, scroll compensation, or zoom-scale
+   conversion needed. (Previously this mixed canvas-wrap-relative coordinates
+   with a box actually positioned relative to canvas-frame, which produced a
+   constant vertical/horizontal offset between the highlight and the real element.) */
+function positionOverlay(box, liveEl){
+  const elRect = liveEl.getBoundingClientRect();
+  box.style.left = elRect.left + 'px';
+  box.style.top = elRect.top + 'px';
+  box.style.width = elRect.width + 'px';
+  box.style.height = elRect.height + 'px';
+}
+
+function clearSelection(){
+  state.selectedId = null;
+  selOutline.style.display = 'none';
+  miniToolbar.classList.add('hidden');
+  document.getElementById('propBody').classList.add('hidden');
+  document.getElementById('propEmpty').classList.remove('hidden');
+  if (htmlHighlightMark){ htmlHighlightMark.clear(); htmlHighlightMark = null; }
+  if (cssHighlightMark){ cssHighlightMark.clear(); cssHighlightMark = null; }
+}
+
+function selectPermanent(elId){
+  const doc = liveDoc();
+  if (!doc) return;
+  const liveEl = doc.querySelector('[data-el="' + elId + '"]');
+  if (!liveEl){ clearSelection(); return; }
+  state.selectedId = elId;
+  resyncSelectionOverlay();
+  syncPropertiesPanel();
+  highlightInHtmlEditor(elId);
+  highlightInCssEditor(elId);
+}
+
+function resyncSelectionOverlay(){
+  const doc = liveDoc();
+  if (!doc || !state.selectedId) return;
+  const liveEl = doc.querySelector('[data-el="' + state.selectedId + '"]');
+  if (!liveEl){ clearSelection(); return; }
+  positionOverlay(selOutline, liveEl);
+  selOutline.style.display = 'block';
+  selLabel.textContent = liveEl.tagName.toLowerCase() + (liveEl.id ? '#' + liveEl.id : '') + (liveEl.className ? '.' + String(liveEl.className).trim().split(/\s+/).join('.') : '');
+  // mini-toolbar is a child of #selOutline and positioned via a fixed CSS
+  // offset (top:-36px; left:0) from it, so it always tracks the selection
+  // box automatically -- no separate JS positioning needed.
+  miniToolbar.classList.remove('hidden');
+}
+
+function highlightInHtmlEditor(elId){
+  if (htmlHighlightMark){ htmlHighlightMark.clear(); htmlHighlightMark = null; }
+  const range = findElementRangeById(state.html, elId);
+  if (!range) return;
+  const from = htmlEditor.posFromIndex(range.start);
+  const to = htmlEditor.posFromIndex(range.openEnd);
+  htmlHighlightMark = htmlEditor.markText(from, to, { className: 'cm-src-hi' });
+  htmlEditor.scrollIntoView(from, 80);
+}
+
+function highlightInCssEditor(elId){
+  if (cssHighlightMark){ cssHighlightMark.clear(); cssHighlightMark = null; }
+  const block = findRuleBlock(state.css, '[data-el="' + elId + '"]');
+  if (!block) return;
+  const from = cssEditor.posFromIndex(block.start);
+  const to = cssEditor.posFromIndex(block.end);
+  cssHighlightMark = cssEditor.markText(from, to, { className: 'cm-src-hi' });
+}
+
+window.addEventListener('resize', () => { if (state.selectedId) resyncSelectionOverlay(); });
+canvasWrap.addEventListener('scroll', () => { if (state.selectedId) resyncSelectionOverlay(); });
+
+/* ===================================================================
+   COMMIT HELPERS (source of truth = state.html / state.css)
+   =================================================================== */
+function programmaticSet(editor, value){
+  programmatic = true;
+  const cursor = editor.getCursor();
+  editor.setValue(value);
+  try { editor.setCursor(cursor); } catch (e){}
+  programmatic = false;
+}
+
+function commitHtml(newHtml, opts){
+  opts = opts || {};
+  state.html = newHtml;
+  programmaticSet(htmlEditor, newHtml);
+  if (!opts.skipRender) render();
+  pushHistory(!!opts.immediate);
+}
+
+function commitCss(newCss, opts){
+  opts = opts || {};
+  state.css = newCss;
+  programmaticSet(cssEditor, newCss);
+  if (!opts.skipRender) render();
+  pushHistory(!!opts.immediate);
+}
+
+function applyProp(prop, value){
+  if (!state.selectedId) return;
+  state.css = setElementRuleProps(state.css, state.selectedId, { [prop]: value });
+  programmaticSet(cssEditor, state.css);
+  render();
+  pushHistory(false);
+}
+
+/* ===================================================================
+   UNDO / REDO
+   =================================================================== */
+function pushHistory(immediate){
+  clearTimeout(historyDebounce);
+  const commit = () => {
+    const snap = { html: state.html, css: state.css };
+    const last = state.history[state.historyIndex];
+    if (last && last.html === snap.html && last.css === snap.css) return;
+    state.history = state.history.slice(0, state.historyIndex + 1);
+    state.history.push(snap);
+    if (state.history.length > 100) state.history.shift();
+    state.historyIndex = state.history.length - 1;
+    updateUndoRedoButtons();
+  };
+  if (immediate) commit();
+  else historyDebounce = setTimeout(commit, 500);
+}
+
+function undo(){
+  if (state.historyIndex <= 0) return;
+  state.historyIndex--;
+  restoreSnapshot(state.history[state.historyIndex]);
+}
+function redo(){
+  if (state.historyIndex >= state.history.length - 1) return;
+  state.historyIndex++;
+  restoreSnapshot(state.history[state.historyIndex]);
+}
+function restoreSnapshot(snap){
+  state.html = snap.html;
+  state.css = snap.css;
+  programmaticSet(htmlEditor, state.html);
+  programmaticSet(cssEditor, state.css);
+  const keepId = state.selectedId;
+  state.pendingSelectId = keepId;
+  render();
+  updateUndoRedoButtons();
+}
+function updateUndoRedoButtons(){
+  document.getElementById('btnUndo').disabled = state.historyIndex <= 0;
+  document.getElementById('btnRedo').disabled = state.historyIndex >= state.history.length - 1;
+}
+
+/* ===================================================================
+   CODEMIRROR CHANGE -> COMMIT (manual code editing)
+   =================================================================== */
+htmlEditor.on('change', (cm, change) => {
+  if (programmatic) return;
+  state.html = cm.getValue();
+  scheduleRender(250);
+  pushHistory(false);
+});
+cssEditor.on('change', (cm, change) => {
+  if (programmatic) return;
+  state.css = cm.getValue();
+  scheduleRender(250);
+  pushHistory(false);
+  showCssHint(cm);
+});
+cssEditor.on('cursorActivity', (cm) => { if (!programmatic) showCssHint(cm); });
+
+function showCssHint(cm){
+  const bar = document.getElementById('cssHintBar');
+  const line = cm.getLine(cm.getCursor().line);
+  const m = /^\s*([a-zA-Z-]+)\s*:\s*([^;]*)/.exec(line);
+  if (!m){ bar.classList.remove('show'); return; }
+  const hint = lookupHint(m[1].trim(), m[2].trim());
+  if (!hint){ bar.classList.remove('show'); return; }
+  bar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.3 1 2.1V16h6v-.4c0-.8.4-1.5 1-2.1A6 6 0 0 0 12 3z"/></svg><span>' + hint + '</span>';
+  bar.classList.add('show');
+}
+
+/* HTML editor: clicking inside an element's markup selects it on canvas,
+   and shows a short teaching note about that tag (обучающий режим). */
+htmlEditor.on('cursorActivity', (cm) => {
+  if (programmatic) return;
+  const idx = cm.indexFromPos(cm.getCursor());
+  const hit = elementAtOffset(state.html, idx);
+
+  const bar = document.getElementById('htmlHintBar');
+  const tagHint = hit ? lookupHtmlHint(hit.tag) : null;
+  if (tagHint){
+    bar.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.3 1 2.1V16h6v-.4c0-.8.4-1.5 1-2.1A6 6 0 0 0 12 3z"/></svg><span>' + tagHint + '</span>';
+    bar.classList.add('show');
+  } else bar.classList.remove('show');
+
+  if (hit && hit.dataEl && hit.dataEl !== state.selectedId){
+    state.selectedId = hit.dataEl;
+    const doc = liveDoc();
+    if (doc && doc.querySelector('[data-el="' + hit.dataEl + '"]')){
+      resyncSelectionOverlay();
+      syncPropertiesPanel();
+      if (cssHighlightMark){ cssHighlightMark.clear(); cssHighlightMark = null; }
+      highlightInCssEditor(hit.dataEl);
+    }
+  }
+});
+
+/* ===================================================================
+   PROPERTIES PANEL
+   =================================================================== */
+const propEmpty = document.getElementById('propEmpty');
+const propBody = document.getElementById('propBody');
+const propSelTag = document.getElementById('propSelTag');
+
+function px(v){ return (v === '' || v == null) ? '' : (/^-?[\d.]+$/.test(String(v).trim()) ? v + 'px' : v); }
+
+function syncPropertiesPanel(){
+  if (!state.selectedId){ propEmpty.classList.remove('hidden'); propBody.classList.add('hidden'); return; }
+  propEmpty.classList.add('hidden');
+  propBody.classList.remove('hidden');
+  const doc = liveDoc();
+  const liveEl = doc ? doc.querySelector('[data-el="' + state.selectedId + '"]') : null;
+  const rule = getElementRuleProps(state.css, state.selectedId);
+  propSelTag.textContent = liveEl ? liveEl.tagName.toLowerCase() : '—';
+
+  document.getElementById('pId').value = getOpenTagAttr(state.html, state.selectedId, 'id');
+  document.getElementById('pClass').value = getOpenTagAttr(state.html, state.selectedId, 'class');
+
+  // generic data-prop text/select fields
+  document.querySelectorAll('[data-prop]').forEach((ctrl) => {
+    if (ctrl.classList.contains('icon-group')) return; // handled separately below
+    const prop = ctrl.dataset.prop;
+    ctrl.value = rule.get(prop) || '';
+  });
+
+  // icon groups
+  ['gDirection','gWrap','gJustify','gAlign','gTextAlign'].forEach((gid) => {
+    const g = document.getElementById(gid);
+    const prop = g.dataset.prop;
+    const val = rule.get(prop) || '';
+    g.querySelectorAll('button').forEach((b) => b.classList.toggle('active', b.dataset.value === val));
+  });
+
+  // gap + radius sliders
+  const gapVal = parseInt(rule.get('gap')) || 0;
+  document.getElementById('pGapRange').value = gapVal;
+  const radiusVal = parseInt(rule.get('border-radius')) || 0;
+  document.getElementById('pRadiusRange').value = radiusVal;
+
+  // color: text color
+  document.getElementById('pColorSwatch').value = toHexColor(rule.get('color')) || '#000000';
+  // background
+  const bg = parseColorAlpha(rule.get('background-color'));
+  document.getElementById('pBgSwatch').value = bg.hex;
+  document.getElementById('pBgHex').value = rule.get('background-color') ? bg.hex : '';
+  document.getElementById('pBgAlpha').value = rule.get('background-color') ? Math.round(bg.alpha * 100) + ' %' : '';
+  // border color
+  document.getElementById('pBorderColorSwatch').value = toHexColor(rule.get('border-color')) || '#e2e5ec';
+
+  // shadow (parse "x y blur rgba(...)")
+  const sh = rule.get('box-shadow') || '';
+  const shm = /(-?\d+(?:\.\d+)?px)\s+(-?\d+(?:\.\d+)?px)\s+(-?\d+(?:\.\d+)?px)\s+(.+)/.exec(sh.trim());
+  if (shm){
+    document.getElementById('pShX').value = shm[1];
+    document.getElementById('pShY').value = shm[2];
+    document.getElementById('pShBlur').value = shm[3];
+    const shColor = parseColorAlpha(shm[4]);
+    document.getElementById('pShColorSwatch').value = shColor.hex;
+    document.getElementById('pShAlpha').value = Math.round(shColor.alpha * 100) + ' %';
+  } else {
+    ['pShX','pShY','pShBlur','pShAlpha'].forEach((id) => document.getElementById(id).value = '');
+    document.getElementById('pShColorSwatch').value = '#000000';
+  }
+}
+
+function toHexColor(v){
+  if (!v) return null;
+  v = v.trim();
+  if (/^#[0-9a-f]{3,8}$/i.test(v)) return v.length === 4 ? '#' + [...v.slice(1)].map(c => c + c).join('') : v.slice(0, 7);
+  const m = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/.exec(v);
+  if (m) return '#' + [m[1], m[2], m[3]].map(n => (+n).toString(16).padStart(2, '0')).join('');
+  return null;
+}
+function parseColorAlpha(v){
+  if (!v) return { hex: '#ffffff', alpha: 1 };
+  const m = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+))?\)/.exec(v);
+  if (m) return { hex: '#' + [m[1], m[2], m[3]].map(n => (+n).toString(16).padStart(2, '0')).join(''), alpha: m[4] !== undefined ? parseFloat(m[4]) : 1 };
+  const hex = toHexColor(v);
+  return { hex: hex || '#ffffff', alpha: 1 };
+}
+function hexToRgb(hex){
+  const h = hex.replace('#', '');
+  const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+}
+
+/* -- generic bindings: text/select fields with data-prop --
+   (pGap/pRadius/pColor/pBorderColor are excluded: they are paired with a
+   slider or color swatch below and get their commit listener from there,
+   to avoid firing applyProp twice for one user action) */
+const PAIRED_FIELD_IDS = new Set(['pGap', 'pRadius', 'pColor', 'pBorderColor']);
+document.querySelectorAll('.prop-body [data-prop]').forEach((ctrl) => {
+  if (ctrl.classList.contains('icon-group')) return;
+  if (PAIRED_FIELD_IDS.has(ctrl.id)) return;
+  const commit = () => applyProp(ctrl.dataset.prop, ctrl.value.trim());
+  ctrl.addEventListener('change', commit);
+  if (ctrl.tagName === 'INPUT') ctrl.addEventListener('keydown', (e) => { if (e.key === 'Enter') ctrl.blur(); });
+});
+
+/* -- icon groups -- */
+document.querySelectorAll('.icon-group[data-prop]').forEach((group) => {
+  group.querySelectorAll('button').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const isActive = btn.classList.contains('active');
+      group.querySelectorAll('button').forEach((b) => b.classList.remove('active'));
+      const val = isActive ? '' : btn.dataset.value;
+      if (!isActive) btn.classList.add('active');
+      applyProp(group.dataset.prop, val);
+    });
+  });
+});
+
+/* -- id / classes -- */
+document.getElementById('pId').addEventListener('change', (e) => {
+  if (!state.selectedId) return;
+  commitHtml(setOpenTagAttr(state.html, state.selectedId, 'id', e.target.value.trim()));
+});
+document.getElementById('pClass').addEventListener('change', (e) => {
+  if (!state.selectedId) return;
+  commitHtml(setOpenTagAttr(state.html, state.selectedId, 'class', e.target.value.trim()));
+});
+
+/* -- gap / radius sliders linked to text fields --
+   'input' fires continuously while dragging; coalesce with requestAnimationFrame
+   so a fast drag doesn't spam full CodeMirror setValue + iframe reloads. */
+function rafCoalesce(fn){
+  let pending = false, lastArgs = null;
+  return (...args) => {
+    lastArgs = args;
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(() => { pending = false; fn(...lastArgs); });
+  };
+}
+function linkSlider(rangeId, textId, prop, unit){
+  const range = document.getElementById(rangeId);
+  const text = document.getElementById(textId);
+  const commitRange = rafCoalesce(() => applyProp(prop, range.value + unit));
+  range.addEventListener('input', () => { text.value = range.value + unit; commitRange(); });
+  text.addEventListener('change', () => {
+    const n = parseInt(text.value) || 0;
+    range.value = n;
+    applyProp(prop, text.value.trim());
+  });
+}
+linkSlider('pGapRange', 'pGap', 'gap', 'px');
+linkSlider('pRadiusRange', 'pRadius', 'border-radius', 'px');
+
+/* -- color swatches linked to text fields -- */
+function linkColorText(swatchId, textId, prop){
+  const swatch = document.getElementById(swatchId);
+  const text = document.getElementById(textId);
+  const commitSwatch = rafCoalesce(() => applyProp(prop, swatch.value));
+  swatch.addEventListener('input', () => { text.value = swatch.value; commitSwatch(); });
+  text.addEventListener('change', () => { if (/^#[0-9a-f]{6}$/i.test(text.value.trim())) swatch.value = text.value.trim(); applyProp(prop, text.value.trim()); });
+}
+linkColorText('pColorSwatch', 'pColor', 'color');
+linkColorText('pBorderColorSwatch', 'pBorderColor', 'border-color');
+
+/* -- background: hex + alpha -> rgba(background-color) -- */
+function commitBackground(){
+  const hex = document.getElementById('pBgHex').value.trim() || document.getElementById('pBgSwatch').value;
+  const alphaRaw = document.getElementById('pBgAlpha').value.replace('%', '').trim();
+  const alpha = alphaRaw === '' ? 1 : Math.max(0, Math.min(100, parseFloat(alphaRaw))) / 100;
+  if (!hex){ applyProp('background-color', ''); return; }
+  const rgb = hexToRgb(hex);
+  applyProp('background-color', 'rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + alpha.toFixed(2) + ')');
+}
+const commitBackgroundRaf = rafCoalesce(commitBackground);
+document.getElementById('pBgSwatch').addEventListener('input', () => { document.getElementById('pBgHex').value = document.getElementById('pBgSwatch').value; commitBackgroundRaf(); });
+document.getElementById('pBgHex').addEventListener('change', commitBackground);
+document.getElementById('pBgAlpha').addEventListener('change', commitBackground);
+
+/* -- shadow composite -- */
+function commitShadow(){
+  const x = document.getElementById('pShX').value.trim();
+  const y = document.getElementById('pShY').value.trim();
+  const blur = document.getElementById('pShBlur').value.trim();
+  const hex = document.getElementById('pShColorSwatch').value;
+  const alphaRaw = document.getElementById('pShAlpha').value.replace('%', '').trim();
+  if (!x && !y && !blur){ applyProp('box-shadow', ''); return; }
+  const alpha = alphaRaw === '' ? 0.15 : Math.max(0, Math.min(100, parseFloat(alphaRaw))) / 100;
+  const rgb = hexToRgb(hex);
+  const value = (x || '0px') + ' ' + (y || '4px') + ' ' + (blur || '12px') + ' rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + alpha.toFixed(2) + ')';
+  applyProp('box-shadow', value);
+}
+['pShX','pShY','pShBlur','pShAlpha'].forEach((id) => document.getElementById(id).addEventListener('change', commitShadow));
+document.getElementById('pShColorSwatch').addEventListener('input', rafCoalesce(commitShadow));
+document.getElementById('pShPreset').addEventListener('click', () => {
+  document.getElementById('pShX').value = '0px';
+  document.getElementById('pShY').value = '4px';
+  document.getElementById('pShBlur').value = '16px';
+  document.getElementById('pShAlpha').value = '15 %';
+  document.getElementById('pShColorSwatch').value = '#000000';
+  commitShadow();
+});
+
+/* ===================================================================
+   MINI TOOLBAR: move / duplicate / parent / delete + resize handle
+   =================================================================== */
+document.getElementById('mtDel').addEventListener('click', () => {
+  if (!state.selectedId) return;
+  const id = state.selectedId;
+  let newHtml = deleteElementById(state.html, id);
+  let newCss = removeElementRule(state.css, id);
+  clearSelection();
+  state.html = newHtml; state.css = newCss;
+  programmaticSet(htmlEditor, state.html);
+  programmaticSet(cssEditor, state.css);
+  render();
+  pushHistory(true);
+});
+
+document.getElementById('mtDup').addEventListener('click', () => {
+  if (!state.selectedId) return;
+  const id = state.selectedId;
+  const range = findElementRangeById(state.html, id);
+  if (!range) return;
+  const newId = 'el' + (state.elCounter++);
+  const original = state.html.slice(range.start, range.end);
+  let copy = stripDataAttrs(original);
+  copy = copy.replace(/^(<[a-zA-Z][a-zA-Z0-9-]*)/, '$1 data-el="' + newId + '"');
+  const newHtml = state.html.slice(0, range.end) + copy + state.html.slice(range.end);
+  const ruleProps = getElementRuleProps(state.css, id);
+  const propsObj = {};
+  ruleProps.forEach((v, k) => propsObj[k] = v);
+  const newCss = setElementRuleProps(state.css, newId, propsObj);
+  state.html = newHtml; state.css = newCss;
+  programmaticSet(htmlEditor, state.html);
+  programmaticSet(cssEditor, state.css);
+  state.pendingSelectId = newId;
+  render();
+  pushHistory(true);
+});
+
+document.getElementById('mtParent').addEventListener('click', () => {
+  const doc = liveDoc();
+  if (!doc || !state.selectedId) return;
+  const liveEl = doc.querySelector('[data-el="' + state.selectedId + '"]');
+  if (!liveEl || !liveEl.parentElement || liveEl.parentElement.tagName === 'BODY') return;
+  selectFromLiveElement(liveEl.parentElement);
+});
+
+/* drag-to-reorder among siblings */
+document.getElementById('mtMove').addEventListener('pointerdown', (e) => {
+  if (!state.selectedId) return;
+  e.preventDefault();
+  dragState = { id: state.selectedId, lastSwap: 0 };
+  document.addEventListener('pointermove', onDragMove);
+  document.addEventListener('pointerup', onDragEnd, { once: true });
+});
+function onDragMove(e){
+  if (!dragState) return;
+  const doc = liveDoc();
+  if (!doc) return;
+  const frameRect = previewFrame.getBoundingClientRect();
+  const x = e.clientX - frameRect.left, y = e.clientY - frameRect.top;
+  if (x < 0 || y < 0 || x > frameRect.width || y > frameRect.height) return;
+  const hit = doc.elementFromPoint(x, y);
+  if (!hit) return;
+  const draggedEl = doc.querySelector('[data-el="' + dragState.id + '"]');
+  if (!draggedEl) return;
+  let sibling = hit;
+  while (sibling && sibling.parentElement !== draggedEl.parentElement) sibling = sibling.parentElement;
+  if (!sibling || sibling === draggedEl) return;
+  const now = Date.now();
+  if (now - dragState.lastSwap < 180) return;
+  const kids = Array.from(draggedEl.parentElement.children);
+  const di = kids.indexOf(draggedEl), si = kids.indexOf(sibling);
+  if (si === di - 1){ state.html = moveElementRelative(state.html, dragState.id, -1); }
+  else if (si === di + 1){ state.html = moveElementRelative(state.html, dragState.id, 1); }
+  else return;
+  dragState.lastSwap = now;
+  programmaticSet(htmlEditor, state.html);
+  state.pendingSelectId = dragState.id;
+  render();
+}
+function onDragEnd(){
+  document.removeEventListener('pointermove', onDragMove);
+  if (dragState) pushHistory(true);
+  dragState = null;
+}
+
+/* resize handle */
+document.getElementById('resizeHandle').addEventListener('pointerdown', (e) => {
+  if (!state.selectedId) return;
+  e.preventDefault(); e.stopPropagation();
+  const doc = liveDoc();
+  const liveEl = doc && doc.querySelector('[data-el="' + state.selectedId + '"]');
+  if (!liveEl) return;
+  const cs = doc.defaultView.getComputedStyle(liveEl);
+  resizeState = { id: state.selectedId, startX: e.clientX, startY: e.clientY, startW: parseFloat(cs.width), startH: parseFloat(cs.height), el: liveEl };
+  document.addEventListener('pointermove', onResizeMove);
+  document.addEventListener('pointerup', onResizeEnd, { once: true });
+});
+function onResizeMove(e){
+  if (!resizeState) return;
+  const dx = e.clientX - resizeState.startX, dy = e.clientY - resizeState.startY;
+  const w = Math.max(16, Math.round(resizeState.startW + dx));
+  const h = Math.max(16, Math.round(resizeState.startH + dy));
+  resizeState.el.style.width = w + 'px';
+  resizeState.el.style.height = h + 'px';
+  resizeState.w = w; resizeState.h = h;
+  positionOverlay(selOutline, resizeState.el);
+  // mini-toolbar tracks selOutline automatically via its fixed CSS offset.
+}
+function onResizeEnd(){
+  document.removeEventListener('pointermove', onResizeMove);
+  if (resizeState){
+    state.css = setElementRuleProps(state.css, resizeState.id, { width: resizeState.w + 'px', height: resizeState.h + 'px' });
+    programmaticSet(cssEditor, state.css);
+    render();
+    pushHistory(true);
+  }
+  resizeState = null;
+}
+
+/* ===================================================================
+   COMPONENT PALETTE
+   =================================================================== */
+const compScroll = document.getElementById('compScroll');
+function renderPalette(filter){
+  filter = (filter || '').trim().toLowerCase();
+  const cats = {};
+  COMPONENTS.forEach((c) => {
+    if (filter && !c.label.toLowerCase().includes(filter) && !c.key.includes(filter)) return;
+    (cats[c.cat] = cats[c.cat] || []).push(c);
+  });
+  compScroll.innerHTML = '';
+  Object.keys(cats).forEach((cat) => {
+    const h = document.createElement('div');
+    h.className = 'comp-cat';
+    h.textContent = cat;
+    compScroll.appendChild(h);
+    const grid = document.createElement('div');
+    grid.className = 'comp-grid';
+    cats[cat].forEach((c) => {
+      const item = document.createElement('div');
+      item.className = 'comp-item' + (c.wide ? ' comp-wide' : '');
+      item.draggable = true;
+      item.innerHTML = '<div class="ic">' + c.icon + '</div><div class="lb">' + c.label + '</div>';
+      item.addEventListener('click', () => insertComponent(c));
+      item.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/component', c.key); });
+      grid.appendChild(item);
+    });
+    compScroll.appendChild(grid);
+  });
+}
+renderPalette();
+document.getElementById('compSearch').addEventListener('input', (e) => renderPalette(e.target.value));
+
+function insertComponent(comp){
+  const newId = 'el' + (state.elCounter++);
+  const snippet = comp.html(newId);
+  const targetId = state.selectedId;
+  const newHtml = insertSnippetInto(document, state.html, targetId, snippet);
+  state.html = newHtml;
+  if (comp.css) state.css = setElementRuleProps(state.css, newId, comp.css);
+  programmaticSet(htmlEditor, state.html);
+  programmaticSet(cssEditor, state.css);
+  state.pendingSelectId = newId;
+  render();
+  pushHistory(true);
+}
+
+canvasWrap.addEventListener('dragover', (e) => { e.preventDefault(); });
+canvasWrap.addEventListener('drop', (e) => {
+  e.preventDefault();
+  const key = e.dataTransfer.getData('text/component');
+  const comp = COMPONENTS.find((c) => c.key === key);
+  if (comp) insertComponent(comp);
+});
+
+/* ===================================================================
+   TOOLBAR: new / open / save / export / import / copy / clear
+   =================================================================== */
+function toast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastText').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function buildStandaloneDoc(){
+  return '<!DOCTYPE html>\n<html lang="ru">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>Проект</title>\n<style>\n' + state.css + '\n</style>\n</head>\n<body>\n' + state.html + '\n</body>\n</html>\n';
+}
+
+function resetProject(){
+  state.html = ''; state.css = ''; state.elCounter = 1;
+  clearSelection();
+  programmaticSet(htmlEditor, ''); programmaticSet(cssEditor, '');
+  state.history = []; state.historyIndex = -1;
+  render();
+  pushHistory(true);
+}
+
+document.getElementById('btnNew').addEventListener('click', () => {
+  if (confirm('Создать новый проект? Несохранённые изменения будут потеряны.')) resetProject();
+});
+document.getElementById('btnClear').addEventListener('click', () => {
+  if (confirm('Очистить холст? Это действие можно отменить (Ctrl+Z).')) resetProject();
+});
+document.getElementById('btnSave').addEventListener('click', () => {
+  try {
+    localStorage.setItem('editor41_project', JSON.stringify({ html: state.html, css: state.css }));
+    toast('Сохранено в этом браузере');
+  } catch (e){ toast('Не удалось сохранить'); }
+});
+document.getElementById('btnOpen').addEventListener('click', () => {
+  try {
+    const raw = localStorage.getItem('editor41_project');
+    if (raw){
+      const data = JSON.parse(raw);
+      clearSelection();
+      state.html = data.html || ''; state.css = data.css || '';
+      programmaticSet(htmlEditor, state.html); programmaticSet(cssEditor, state.css);
+      render(); pushHistory(true);
+      toast('Загружено сохранённое в браузере');
+      return;
+    }
+  } catch (e){}
+  document.getElementById('fileInput').click();
+});
+document.getElementById('btnImport').addEventListener('click', () => document.getElementById('fileInput').click());
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(reader.result, 'text/html');
+      const styleEl = doc.querySelector('style');
+      const css = styleEl ? styleEl.textContent : '';
+      if (styleEl) styleEl.remove();
+      const html = doc.body ? doc.body.innerHTML.trim() : reader.result;
+      clearSelection();
+      state.html = html; state.css = css || '';
+      programmaticSet(htmlEditor, state.html); programmaticSet(cssEditor, state.css);
+      render(); pushHistory(true);
+      toast('Файл импортирован');
+    } catch (err){ toast('Не удалось прочитать файл'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+document.getElementById('btnExport').addEventListener('click', () => {
+  const blob = new Blob([buildStandaloneDoc()], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'project.html';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+  toast('Файл скачан');
+});
+
+function copyText(text, label){
+  const done = () => toast(label + ' скопирован');
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+  } else fallbackCopy(text, done);
+}
+function fallbackCopy(text, cb){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); cb(); } catch (e){ toast('Не удалось скопировать'); }
+  ta.remove();
+}
+document.getElementById('btnCopyHtml').addEventListener('click', () => copyText(state.html, 'HTML'));
+document.getElementById('btnCopyCss').addEventListener('click', () => copyText(state.css, 'CSS'));
+document.getElementById('btnCopyAll').addEventListener('click', () => copyText(buildStandaloneDoc(), 'Весь код'));
+
+document.getElementById('btnUndo').addEventListener('click', undo);
+document.getElementById('btnRedo').addEventListener('click', redo);
+document.addEventListener('keydown', (e) => {
+  const activeTag = document.activeElement ? document.activeElement.tagName : '';
+  const inCM = document.activeElement && document.activeElement.closest && document.activeElement.closest('.CodeMirror');
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey && !inCM){ e.preventDefault(); undo(); }
+  if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey)) && !inCM){ e.preventDefault(); redo(); }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && state.selectedId && !['INPUT','TEXTAREA','SELECT'].includes(activeTag) && !inCM){
+    e.preventDefault();
+    document.getElementById('mtDel').click();
+  }
+  if (e.key === 'Escape') clearSelection();
+});
+
+/* ===================================================================
+   THEME / DEVICE / ZOOM / GRID / ALIGN
+   =================================================================== */
+function setTheme(theme){
+  state.theme = theme;
+  document.body.dataset.theme = theme;
+  document.getElementById('btnThemeLight').classList.toggle('active', theme === 'light');
+  document.getElementById('btnThemeDark').classList.toggle('active', theme === 'dark');
+  setEditorsTheme(theme);
+  try { localStorage.setItem('editor41_theme', theme); } catch (e){}
+}
+document.getElementById('btnThemeLight').addEventListener('click', () => setTheme('light'));
+document.getElementById('btnThemeDark').addEventListener('click', () => setTheme('dark'));
+
+document.getElementById('toolSeg').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-tool]');
+  if (!btn) return;
+  document.querySelectorAll('#toolSeg button').forEach((b) => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.tool = btn.dataset.tool;
+});
+
+const DEVICE_WIDTHS = { desktop: '1200px', tablet: '768px', mobile: '375px' };
+document.getElementById('deviceSeg').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-device]');
+  if (!btn) return;
+  document.querySelectorAll('#deviceSeg button').forEach((b) => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.device = btn.dataset.device;
+  canvasFrame.style.width = DEVICE_WIDTHS[state.device];
+  setTimeout(() => { if (state.selectedId) resyncSelectionOverlay(); }, 180);
+});
+
+function setZoom(z){
+  state.zoom = Math.max(50, Math.min(150, z));
+  canvasFrame.style.transform = 'scale(' + (state.zoom / 100) + ')';
+  canvasFrame.style.transformOrigin = 'top center';
+  document.getElementById('zoomReadout').textContent = state.zoom + '%';
+  if (state.selectedId) resyncSelectionOverlay();
+}
+document.getElementById('zoomIn').addEventListener('click', () => setZoom(state.zoom + 10));
+document.getElementById('zoomOut').addEventListener('click', () => setZoom(state.zoom - 10));
+
+const gridSwitch = document.getElementById('gridSwitch');
+gridSwitch.addEventListener('click', () => {
+  gridSwitch.classList.toggle('on');
+  document.getElementById('gridOverlay').classList.toggle('show', gridSwitch.classList.contains('on'));
+});
+
+document.getElementById('alignSeg').addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-align]');
+  if (!btn) return;
+  if (!state.selectedId){ toast('Сначала выберите flex- или grid-контейнер на холсте'); return; }
+  applyProp('justify-content', btn.dataset.align);
+  syncPropertiesPanel();
+});
+
+/* ===================================================================
+   INIT
+   =================================================================== */
+(function init(){
+  try {
+    const savedTheme = localStorage.getItem('editor41_theme');
+    if (savedTheme) setTheme(savedTheme);
+  } catch (e){}
+  render();
+  pushHistory(true);
+  updateUndoRedoButtons();
+  setTimeout(() => htmlEditor.refresh(), 50);
+  setTimeout(() => cssEditor.refresh(), 50);
+})();
+</script>
+</body>
+</html>

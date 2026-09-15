@@ -1,0 +1,300 @@
+/*
+  ЛАБОРАТОРНАЯ РАБОТА №2
+  ИТОГОВОЕ ЗАДАНИЕ
+  Вариант 03
+  Стиль: «ТЦ» — ТЦ «Галерея»
+
+  Полное описание задания и требований — в var03.html.
+*/
+
+/* Обязательный элемент в любом проекте — глобальный box-sizing,
+   чтобы padding и border не увеличивали заданную ширину элементов. */
+* {
+  box-sizing: border-box;
+}
+
+/* Дальше — вся стилизация ваша: цвета, отступы, Flexbox, Grid,
+   position, псевдоклассы/псевдоэлементы, адаптивность. */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  background: #f5f3ee;
+}
+
+h2 {
+  font-size: 31px;
+  color: #1d2b3c;
+}
+
+h3 {
+  font-size: 25px;
+  color: #1d2b3c;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 32px;
+  background: #1d2b3c;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: 1px;
+}
+
+.nav {
+  display: flex;
+  gap: 24px;
+}
+
+.nav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav a:hover {
+  color: #e6b85c;
+}
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 20px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.hero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  padding: 40px 24px;
+  background: linear-gradient(135deg, #27364a, #3f5270);
+  color: #fff;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.feature-card {
+  background: #fff;
+  border: 1px solid #e3ddd1;
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.feature-card h3 {
+  margin-top: 0;
+}
+
+.promo-card p {
+  margin-bottom: 0;
+}
+
+.food-court {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 32px;
+  background: #fff;
+  border: 1px solid #e3ddd1;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.food-court-copy {
+  flex: 1;
+}
+
+.food-court-copy h2 {
+  margin-top: 0;
+}
+
+.food-court-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.food-court-list li {
+  margin-bottom: 6px;
+}
+
+.food-court-figure {
+  flex: 1;
+  margin: 0;
+}
+
+.food-court-figure img {
+  width: 100%;
+  display: block;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.food-court-figure figcaption {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.promo-card {
+  position: relative;
+  padding: 40px;
+  background: #1d2b3c;
+  color: #fff;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.badge {
+  position: absolute;
+  top: -16px;
+  right: 24px;
+  background: #e6b85c;
+  color: #1d2b3c;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 999px;
+}
+
+.form-section h2 {
+  text-align: center;
+  margin-top: 0;
+}
+
+.form-section form {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid #e3ddd1;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-field label {
+  font-weight: 600;
+  color: #1d2b3c;
+}
+
+.required::after {
+  content: " *";
+  color: firebrick;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.form-field input:focus {
+  border-color: #e6b85c;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(230, 184, 92, 0.3);
+}
+
+.radio-group {
+  margin: 0;
+  border: 1px solid #e3ddd1;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.radio-group legend {
+  padding: 0 6px;
+  font-weight: 600;
+  color: #1d2b3c;
+}
+
+.btn {
+  background: #1d2b3c;
+  color: #fff;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #e6b85c;
+  color: #1d2b3c;
+}
+
+footer {
+  margin-top: 48px;
+  padding: 24px 20px;
+  background: #1d2b3c;
+  color: #cfd8e3;
+  text-align: center;
+}
+
+footer p {
+  margin: 0;
+}
+
+@media (max-width: 700px) {
+  header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+  }
+
+  .food-court {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .form-section form {
+    padding: 20px;
+  }
+}

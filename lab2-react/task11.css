@@ -1,0 +1,82 @@
+/*
+  ЛАБОРАТОРНАЯ РАБОТА №2
+  ЗАДАНИЕ №11: Адаптивность (media queries)
+  Вариант 03
+*/
+
+* {
+  box-sizing: border-box;
+}
+
+.tile {
+  background-color: teal;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.menu {
+  display: flex;
+  gap: 16px;
+  background-color: #333;
+  padding: 12px;
+}
+
+.menu a {
+  color: white;
+  text-decoration: none;
+}
+
+/* --- Лёгкий уровень --- */
+
+/* TODO 1: Базовая сетка
+   .gallery — на широком экране (по умолчанию, без media query)
+   сделайте grid-контейнером с тремя равными колонками
+   (repeat(3, 1fr)) и gap: 12px. */
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* --- Средний уровень --- */
+
+/* TODO 2: Сетка на узком экране
+   Добавьте @media (max-width: 570px) — внутри переопределите
+   .gallery так, чтобы на узком экране колонка была ОДНА
+   (grid-template-columns: 1fr). Проверьте через DevTools (режим
+   мобильного устройства) или сужением окна браузера. */
+
+@media (max-width: 570px) {
+  .gallery {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Сложный уровень --- */
+
+/* TODO 3: Меню на самом узком экране
+   Добавьте @media (max-width: 450px) — внутри переопределите .menu
+   так, чтобы на самом узком экране flex-direction стал column
+   (пункты меню друг под другом вместо ряда). */
+
+@media (max-width: 450px) {
+  .menu {
+    flex-direction: column;
+  }
+}
+
+/* --- Задача уровня "предскажи результат" --- */
+
+/* TODO 4: Что сработает при ширине 470px
+   Если открыть страницу на экране шириной 470px — сработают ли
+   ОБА твоих media query одновременно (и из TODO 2, и из TODO 3), или
+   только один? В комментарии объясните, почему (вспомните, что
+   max-width — это "экран ШИРИНОЙ НЕ БОЛЬШЕ, чем..."). */
+
+/* ОТВЕТ: При ширине 470px сработает ТОЛЬКО media query из TODO 2
+   (@media (max-width: 570px)), потому что 470px <= 570px. Media query
+   из TODO 3 (@media (max-width: 450px)) не сработает, так как условие
+   "ширина НЕ БОЛЬШЕ 450px" для 470px не выполняется. Сетка станет
+   одноколоночной, а меню останется в ряд. */

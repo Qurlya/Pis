@@ -1,0 +1,68 @@
+/*
+  ЛАБОРАТОРНАЯ РАБОТА №2
+  ЗАДАНИЕ №10: Псевдоклассы и псевдоэлементы
+  Вариант 03
+*/
+
+* {
+  box-sizing: border-box;
+}
+
+.btn {
+  padding: 12px 24px;
+  background-color: teal;
+  color: white;
+  border: none;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+}
+
+.list li {
+  padding: 8px;
+}
+
+/* --- Лёгкий уровень --- */
+
+/* TODO 1: Состояние hover
+   .btn:hover — при наведении сделайте background-color заметно
+   темнее текущего. */
+
+.btn:hover {
+  background-color: #006666;
+}
+
+/* --- Средний уровень --- */
+
+/* TODO 2: Состояние focus
+   input:focus — когда поле в фокусе, добавьте border: 2px solid
+   slateblue (у input уже есть свой border по умолчанию — просто
+   перезапишите его). */
+
+input:focus {
+  border: 2px solid slateblue;
+}
+
+/* --- Сложный уровень --- */
+
+/* TODO 3: Чередование строк (зебра)
+   .list li:nth-child(even) — сделайте чётным строкам списка
+   background-color: peru. */
+
+.list li:nth-child(even) {
+  background-color: peru;
+}
+
+/* --- Задача уровня "псевдоэлемент" --- */
+
+/* TODO 4: Звёздочка обязательного поля
+   .required::after — вставьте после текста content: " *" красным
+   цветом (color: red). Не забудьте, что content обязателен, без
+   него ничего не появится. */
+
+.required::after {
+  content: " *";
+  color: red;
+}
