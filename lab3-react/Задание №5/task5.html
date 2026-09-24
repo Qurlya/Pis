@@ -1,0 +1,42 @@
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №5: всплытие и делегирование событий
+  Вариант 03
+
+  Все TODO — в var03.js. Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+  <style>
+    #outer { padding: 24px; border: 2px solid #333; }
+    #inner { padding: 24px; border: 2px solid tomato; margin-top: 10px; }
+    .done { text-decoration: line-through; color: #888; }
+    #todo-list { list-style: none; padding: 0; }
+    #todo-list li { padding: 6px 0; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <h1>Зоомагазин «Лапки»</h1>
+
+  <div id="outer">
+    Внешний блок
+    <div id="inner">Внутренний блок (кликните сюда)</div>
+  </div>
+
+  <ul id="todo-list">
+    <li data-id="1"><span class="todo-text">Покормить питомцев</span> <button class="delete-btn">✕</button></li>
+    <li data-id="2"><span class="todo-text">Заказать корм</span> <button class="delete-btn">✕</button></li>
+    <li data-id="3"><span class="todo-text">Убрать вольеры</span> <button class="delete-btn">✕</button></li>
+  </ul>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="var03.js"></script>
+</body>
+</html>

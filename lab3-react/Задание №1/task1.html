@@ -1,0 +1,55 @@
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №1: DOM и выбор элементов
+  Вариант 03
+
+  Откройте файл через Live Server (кнопка "Go Live"), консоль смотрите
+  в DevTools браузера (F12 -> вкладка Console). Все TODO — в var03.js.
+
+  Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+</head>
+<body>
+
+  <h1 id="main-title">Зоомагазин «Лапки»</h1>
+
+  <nav class="menu">
+    <a href="#" class="menu-link">Каталог</a>
+    <a href="#" class="menu-link">Акции</a>
+    <a href="#" class="menu-link">Доставка</a>
+  </nav>
+
+  <div class="card">
+    <h2 class="card-title">Корм для кошек</h2>
+    <p class="card-price">650 ₽</p>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">Игрушка-мышка</h2>
+    <p class="card-price">180 ₽</p>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">Поводок</h2>
+    <p class="card-price">450 ₽</p>
+  </div>
+
+  <ul id="cart-list">
+    <li>Миска</li>
+    <li>Ошейник</li>
+  </ul>
+
+  <button id="buy-btn">Купить</button>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="var03.js"></script>
+</body>
+</html>

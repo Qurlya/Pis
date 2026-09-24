@@ -1,0 +1,36 @@
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №2: изменение содержимого и атрибутов
+  Вариант 03
+
+  Все TODO — в var03.js. Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+  <style>
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; }
+    .badge-online { background: #c6f6d5; color: #22543d; }
+    .badge-offline { background: #e2e8f0; color: #4a5568; }
+  </style>
+</head>
+<body>
+
+  <h1 id="username">Гость</h1>
+  <p id="bio">Здесь будет описание.</p>
+
+  <img id="avatar" src="placeholder.jpg" alt="Изображение" width="80">
+
+  <div id="status-badge" class="badge badge-offline">Нет в наличии</div>
+
+  <div id="notice"></div>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="var03.js"></script>
+</body>
+</html>

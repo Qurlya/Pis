@@ -1,0 +1,38 @@
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №10: JSON (JSON.stringify / JSON.parse)
+  Вариант 03
+
+  Все TODO — в var03.js. Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+</head>
+<body>
+
+  <h1>Зоомагазин «Лапки»</h1>
+
+  <div>
+    <input id="name-field" placeholder="Имя">
+    <input id="age-field" type="number" placeholder="Возраст">
+    <button id="save-btn">Сохранить в localStorage</button>
+    <button id="load-btn">Загрузить из localStorage</button>
+  </div>
+  <div id="output"></div>
+
+  <hr>
+
+  <button id="bad-save-btn">Сохранить БЕЗ stringify (демо ошибки)</button>
+  <button id="bad-load-btn">Прочитать это же значение</button>
+  <div id="bad-output"></div>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="var03.js"></script>
+</body>
+</html>
