@@ -272,6 +272,153 @@ footer p {
   margin: 0;
 }
 
+/* =========================================================================
+   ЛАБОРАТОРНАЯ РАБОТА №3 — ИТОГОВОЕ ЗАДАНИЕ
+   Стили для элементов, добавленных в рамках задания:
+   навигация (.active), карточки (.selected), избранное, промо-таймер,
+   статус формы, отзыв, часы и анимация появления записи.
+   ========================================================================= */
+
+.nav a.active {
+  color: #e6b85c;
+  border-bottom: 2px solid #e6b85c;
+}
+
+.feature-card {
+  cursor: pointer;
+}
+
+.feature-card.selected {
+  border-color: #e6b85c;
+  box-shadow: 0 0 0 3px rgba(230, 184, 92, 0.35);
+}
+
+.add-fav-btn {
+  margin-top: 12px;
+  padding: 8px 14px;
+  border: 1px solid #1d2b3c;
+  border-radius: 8px;
+  background: #fff;
+  color: #1d2b3c;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.add-fav-btn:hover {
+  background: #1d2b3c;
+  color: #fff;
+}
+
+.favorites h2 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+#favorites-list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 640px;
+}
+
+#favorites-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid #e3ddd1;
+  border-radius: 8px;
+}
+
+.remove-fav-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  background: firebrick;
+  color: #fff;
+  cursor: pointer;
+}
+
+.remove-fav-btn:hover {
+  background: #8b1212;
+}
+
+#favorites-empty {
+  margin: 0;
+  text-align: center;
+  color: #6b7280;
+}
+
+#favorites-empty.hidden {
+  display: none;
+}
+
+#promo-timer {
+  display: block;
+  margin-top: 12px;
+  font-size: 32px;
+  font-weight: 700;
+  color: #e6b85c;
+}
+
+#form-status {
+  max-width: 640px;
+  min-height: 24px;
+  margin: 16px auto 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+#form-status.error {
+  color: firebrick;
+}
+
+#form-status.success {
+  color: #22543d;
+}
+
+.review h2 {
+  text-align: center;
+}
+
+#review-content {
+  max-width: 640px;
+  margin: 0 auto 16px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e3ddd1;
+  border-radius: 10px;
+  font-style: italic;
+}
+
+#load-review-btn {
+  display: block;
+  margin: 0 auto;
+}
+
+#site-clock {
+  color: #e6b85c;
+  font-weight: 600;
+}
+
+@keyframes fav-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#favorites-list li.fav-in {
+  animation: fav-in 0.3s ease;
+}
+
 @media (max-width: 700px) {
   header {
     flex-direction: column;

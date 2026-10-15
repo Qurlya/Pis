@@ -14,6 +14,17 @@
 // Показать/скрыть — это classList.remove("hidden") / classList.add("hidden"),
 // а не .remove() самого элемента (это удалило бы его из DOM насовсем).
 
+var toastBtn = document.querySelector("#toast-btn");
+var toast = document.querySelector("#toast");
+
+toastBtn.addEventListener("click", function () {
+  toast.classList.remove("hidden");
+
+  setTimeout(function () {
+    toast.classList.add("hidden");
+  }, 3000);
+});
+
 
 
 // TODO 2: setInterval — живые часы
@@ -23,6 +34,12 @@
 // Подсказка: new Date() создаёт объект с текущей датой/временем прямо в
 // момент вызова — вызывать его нужно ВНУТРИ функции таймера (не один раз
 // снаружи), чтобы время реально обновлялось на каждом тике.
+
+var clock = document.querySelector("#clock");
+
+setInterval(function () {
+  clock.textContent = new Date().toLocaleTimeString();
+}, 1000);
 
 
 
@@ -46,6 +63,28 @@
 // Подсказка: clearInterval(id) вызывается с тем же id, что вернул setInterval —
 // без сохранённого id остановить интервал нечем.
 
+var countdownEl = document.querySelector("#countdown");
+var startBtn = document.querySelector("#start-btn");
+var stopBtn = document.querySelector("#stop-btn");
+var resetBtn = document.querySelector("#reset-btn");
+var countdownTimerId = null;
+
+startBtn.addEventListener("click", function () {
+  if (countdownTimerId !== null) {
+    clearInterval(countdownTimerId);
+  }
+
+  countdownTimerId = setInterval(function () {
+    var nextValue = Number(countdownEl.textContent) - 1;
+    countdownEl.textContent = nextValue;
+
+    if (nextValue <= 0) {
+      clearInterval(countdownTimerId);
+      countdownTimerId = null;
+    }
+  }, 1000);
+});
+
 
 
 // --- Сложный уровень ---
@@ -54,6 +93,11 @@
 // Получите #stop-btn. По клику остановите текущий интервал через
 // clearInterval, используя тот же id, что и в TODO 3/4 (переменная должна
 // быть объявлена ВНЕ функций-обработчиков, чтобы быть доступной во всех них)
+
+stopBtn.addEventListener("click", function () {
+  clearInterval(countdownTimerId);
+  countdownTimerId = null;
+});
 
 
 
@@ -66,6 +110,12 @@
 // иначе при повторном нажатии "Старт" получится два интервала одновременно,
 // и счётчик будет "скакать" быстрее.
 
+resetBtn.addEventListener("click", function () {
+  clearInterval(countdownTimerId);
+  countdownTimerId = null;
+  countdownEl.textContent = "10";
+});
+
 
 
 // --- Задача уровня собеседования ---
@@ -75,5 +125,11 @@
 // что вернул setInterval/setTimeout, в переменную? Что произойдёт, если
 // несколько раз запустить setInterval для одного и того же счётчика, не
 // останавливая предыдущие через clearInterval?
+
+// Ответ: id таймера — это единственный способ потом его остановить, поэтому его
+// и сохраняют в переменную. Если несколько раз запустить setInterval для одного
+// счётчика, не останавливая предыдущие, на странице окажется несколько
+// параллельных интервалов, и каждый из них будет уменьшать число — счётчик
+// начнёт "скакать" в несколько раз быстрее.
 
 

@@ -37,7 +37,7 @@
 
     <header>
       <h1>ТЦ «Галерея»</h1>
-      <nav class="nav">
+      <nav class="nav" id="site-nav">
         <a href="#">Главная</a>
         <a href="#">О нас</a>
         <a href="#">Услуги</a>
@@ -55,15 +55,24 @@
         <div class="feature-card">
           <h3>Качество</h3>
           <p>Мы тщательно следим за каждой деталью.</p>
+          <button type="button" class="add-fav-btn">В избранное</button>
         </div>
         <div class="feature-card">
           <h3>Скорость</h3>
           <p>Быстро решаем любые вопросы клиентов.</p>
+          <button type="button" class="add-fav-btn">В избранное</button>
         </div>
         <div class="feature-card">
           <h3>Забота о клиенте</h3>
           <p>Индивидуальный подход к каждому.</p>
+          <button type="button" class="add-fav-btn">В избранное</button>
         </div>
+      </section>
+
+      <section class="favorites">
+        <h2>Избранное</h2>
+        <ul id="favorites-list"></ul>
+        <p id="favorites-empty">Пока пусто</p>
       </section>
 
       <section class="food-court">
@@ -91,14 +100,21 @@
       <section class="promo">
         <div class="promo-card">
           <span class="badge">Скидка 10%</span>
+          <span id="promo-timer">05:00</span>
           <h2>Специальное предложение</h2>
           <p>Оставьте заявку прямо сейчас — расскажем обо всех деталях.</p>
         </div>
       </section>
 
+      <section class="review">
+        <h2>Отзыв клиента</h2>
+        <div id="review-content">Нажмите кнопку, чтобы загрузить отзыв</div>
+        <button type="button" id="load-review-btn" class="btn">Показать отзыв</button>
+      </section>
+
       <section class="form-section">
         <h2>Оставить заявку</h2>
-        <form action="/submit" method="POST">
+        <form action="/submit" method="POST" novalidate>
 
           <div class="form-field">
             <label class="required" for="fname">Имя</label>
@@ -146,13 +162,20 @@
           <button type="submit" class="btn">Отправить заявку</button>
 
         </form>
+
+        <div id="form-status"></div>
       </section>
 
     </main>
 
     <footer>
+      <p>Текущее время: <span id="site-clock"></span></p>
       <p>&copy; 2026 ТЦ «Галерея». Учебный проект — лабораторная работа №2.</p>
     </footer>
+
+    <!-- Подключаем JS-файл итогового задания лабораторной работы №3
+         ПОСЛЕ разметки (внизу body) -->
+    <script src="итог-лаба3.js"></script>
 
   </body>
 </html>

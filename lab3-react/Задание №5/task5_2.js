@@ -14,6 +14,14 @@
 // глубоком элементе (там, где реально кликнули), а затем поднимается вверх
 // по всем родителям — если у них есть свои обработчики, они тоже сработают.
 
+document.querySelector("#outer").addEventListener("click", function () {
+  console.log("клик по outer");
+});
+
+document.querySelector("#inner").addEventListener("click", function () {
+  console.log("клик по inner");
+});
+
 
 
 // TODO 2: event.target vs event.currentTarget
@@ -24,6 +32,11 @@
 // Подсказка: event.target — элемент, где РЕАЛЬНО произошёл клик (может
 // меняться от клика к клику). event.currentTarget — элемент, на котором
 // висит именно этот обработчик (здесь — всегда #outer, не меняется).
+
+document.querySelector("#outer").addEventListener("click", function (event) {
+  console.log(event.target.id);
+  console.log(event.currentTarget.id);
+});
 
 
 
@@ -53,6 +66,20 @@
 // напрямую — иначе при клике по <span> класс попадёт на span, а не на весь
 // пункт списка.
 
+document.querySelector("#todo-list").addEventListener("click", function (event) {
+  var item = event.target.closest("li");
+
+  if (item === null) {
+    return;
+  }
+
+  if (event.target.classList.contains("delete-btn")) {
+    item.remove();
+  } else {
+    item.classList.toggle("done");
+  }
+});
+
 
 
 // --- Сложный уровень ---
@@ -67,6 +94,10 @@
 // event.preventDefault() из темы 4 — но останавливает не действие браузера
 // по умолчанию, а само всплытие события вверх по родителям.
 
+document.querySelector("#inner").addEventListener("click", function (event) {
+  event.stopPropagation();
+});
+
 
 
 // TODO 6: защита от клика "в пустоту"
@@ -76,6 +107,8 @@
 
 // Подсказка: closest() возвращает null, если подходящего родителя не
 // нашлось — это тот же принцип null-проверки, что был в теме 1 с querySelector.
+// (проверка if (item === null) return стоит в начале обработчика #todo-list выше
+// — в TODO 3/4)
 
 
 
@@ -87,5 +120,11 @@
 // (делегирование) часто лучше, чем вешать отдельный обработчик на каждый
 // дочерний элемент — особенно если элементы могут добавляться на страницу
 // позже?
+
+// Ответ: event.target — это элемент, на котором реально произошло событие,
+// event.currentTarget — элемент, на котором висит обработчик. При
+// делегировании один обработчик на родителя ловит клики по всем текущим и
+// будущим детям, поэтому не нужно вешать обработчики на каждый <li>
+// отдельно и переустанавливать их после добавления новых элементов.
 
 

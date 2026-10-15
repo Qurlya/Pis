@@ -17,11 +17,23 @@
 // .then() подряд: первый разбирает "конверт" (response), второй получает
 // уже готовые данные.
 
+document.querySelector("#load-users-btn").addEventListener("click", function () {
+  fetch("https://jsonplaceholder.typicode.com/users")
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      document.querySelector("#users-result").textContent =
+        "Пользователей: " + data.length;
+    })
+    .catch(error => console.log("Ошибка:", error));
+});
+
 
 
 // TODO 2: покажите количество на странице
 // В том же .then(data => ...) из TODO 1 запишите в #users-result
 // текст вида "Пользователей: " + data.length (через textContent)
+// (запись в #users-result добавлена в тот же .then(data => ...) выше — в TODO 1)
 
 
 
@@ -37,11 +49,25 @@
 // Подсказка: слово async ставится перед function, await — перед fetch(...)
 // и перед response.json(). Без async перед функцией await использовать нельзя.
 
+async function loadSingleUser() {
+  try {
+    var response = await fetch("https://jsonplaceholder.typicode.com/users/1");
+    var data = await response.json();
+    document.querySelector("#single-result").textContent = data.name;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 
 
 // TODO 4: подключите функцию к кнопке
 // Получите #load-single-btn и повесьте на неё "click", который вызывает
 // loadSingleUser() из TODO 3
+
+document.querySelector("#load-single-btn").addEventListener("click", function () {
+  loadSingleUser();
+});
 
 
 
@@ -58,11 +84,29 @@
 // равно "ответил", просто с кодом ошибки. response.ok — это то единственное,
 // что скажет вам, был ли ответ реально успешным (200-299) или нет.
 
+async function loadBadUser() {
+  try {
+    var response = await fetch(
+      "https://jsonplaceholder.typicode.com/users/9999"
+    );
+
+    if (!response.ok) {
+      throw new Error("Пользователь не найден: " + response.status);
+    }
+  } catch (error) {
+    document.querySelector("#error-result").textContent = error.message;
+  }
+}
+
 
 
 // TODO 6: подключите к кнопке
 // Получите #load-bad-btn и повесьте на неё "click", который вызывает
 // loadBadUser() из TODO 5
+
+document.querySelector("#load-bad-btn").addEventListener("click", function () {
+  loadBadUser();
+});
 
 
 
@@ -73,5 +117,10 @@
 // не поймает ситуацию "пользователь не найден" (404)? Что вообще считается
 // "ошибкой" с точки зрения fetch, а что — просто обычным (хоть и неудачным)
 // ответом сервера?
+
+// Ответ: для fetch "ошибкой" считается только сбой сети (нет интернета, DNS,
+// обрыв соединения) — тогда промис отклоняется и срабатывает .catch(). Ответ
+// 404 — это полноценный ответ сервера: fetch считает его успешным, потому что
+// соединение состоялось, и остаётся самому проверять response.ok.
 
 

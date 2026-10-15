@@ -11,6 +11,9 @@
 // camelCase (backgroundColor), а не через дефис, как в CSS-файле
 // (background-color).
 
+var jsBox = document.querySelector("#js-box");
+jsBox.style.backgroundColor = "orange";
+
 
 
 // TODO 2: element.style + единицы измерения
@@ -19,6 +22,9 @@
 
 // Подсказка: box.style.width = 150 (число без единиц) просто не сработает —
 // нужна строка с единицей измерения: box.style.width = "150px".
+
+jsBox.style.width = "150px";
+jsBox.style.height = "80px";
 
 
 
@@ -30,6 +36,9 @@
 // Подсказка: просто две отдельные строки кода, каждая — своё свойство style,
 // как в TODO 1 и 2, друг за другом.
 
+jsBox.style.borderRadius = "10px";
+jsBox.style.border = "2px solid black";
+
 
 
 // TODO 4: element.style на элементе со стилями из CSS-класса
@@ -39,6 +48,8 @@
 // Подсказка: element.style показывает ТОЛЬКО инлайн-стили (заданные прямо
 // через JS или атрибут style="..."). Стили из CSS-класса через него не видны —
 // поэтому результат может вас удивить.
+
+console.log(document.querySelector("#preset-box").style.backgroundColor);
 
 
 
@@ -52,6 +63,8 @@
 // самого элемента!), вызывается отдельно: getComputedStyle(el), а не
 // el.getComputedStyle().
 
+console.log(getComputedStyle(document.querySelector("#preset-box")).backgroundColor);
+
 
 
 // TODO 6: getComputedStyle — ширина
@@ -60,6 +73,8 @@
 // Подсказка: getComputedStyle(element) возвращает объект со ВСЕМИ реальными
 // применёнными стилями, независимо от того, инлайн они, из класса или из
 // стилей браузера по умолчанию.
+
+console.log(getComputedStyle(document.querySelector("#preset-box")).width);
 
 
 
@@ -70,5 +85,11 @@
 // element.style.backgroundColor вывел пустую строку, а в TODO 5
 // getComputedStyle вывел реальный цвет? В чём принципиальная разница между
 // этими двумя способами?
+
+// Ответ: element.style читает ТОЛЬКО инлайн-стили элемента (атрибут style
+// или заданные через JS), а цвет, пришедший из CSS-класса, там пустой —
+// отсюда и пустая строка в TODO 4. getComputedStyle возвращает итоговые
+// вычисленные стили после применения всех источников: инлайн, CSS-классов,
+// стилей родителей и значений по умолчанию.
 
 

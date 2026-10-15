@@ -12,6 +12,10 @@
 // Подсказка: у JSON-строки ключи в кавычках ("name", а не name), и вся
 // структура — это ОДНА строка текста, а не объект.
 
+const person = { name: "Аня", age: 20 };
+console.log(person);
+console.log(JSON.stringify(person));
+
 
 
 // TODO 2: JSON.parse — строка в объект
@@ -19,6 +23,11 @@
 // Через JSON.parse(raw) получите из неё реальный объект, выведите его в
 // консоль и отдельно выведите parsed.name (докажите, что это теперь
 // настоящий объект)
+
+const raw = '{"name":"Аня","age":20}';
+const parsed = JSON.parse(raw);
+console.log(parsed);
+console.log(parsed.name);
 
 
 
@@ -34,6 +43,14 @@
 // Объект без JSON.stringify не сохранится корректно (см. TODO 5 — там как
 // раз демонстрация этой ошибки).
 
+const nameField = document.querySelector("#name-field");
+const ageField = document.querySelector("#age-field");
+
+document.querySelector("#save-btn").addEventListener("click", function () {
+  const profile = { name: nameField.value, age: ageField.value };
+  localStorage.setItem("profile", JSON.stringify(profile));
+});
+
 
 
 // TODO 4: загрузка из localStorage
@@ -45,6 +62,18 @@
 // результат через if перед использованием (parsed.name), иначе можно
 // получить ошибку при обращении к свойству null.
 
+document.querySelector("#load-btn").addEventListener("click", function () {
+  const storedProfile = localStorage.getItem("profile");
+
+  if (storedProfile === null) {
+    return;
+  }
+
+  const savedProfile = JSON.parse(storedProfile);
+  document.querySelector("#output").textContent =
+    "Имя: " + savedProfile.name + ", возраст: " + savedProfile.age;
+});
+
 
 
 // --- Сложный уровень ---
@@ -53,6 +82,10 @@
 // Получите #bad-save-btn. По клику сохраните объект НАПРЯМУЮ, без
 // JSON.stringify: localStorage.setItem("bad", { foo: "bar" })
 // (да, специально неправильно — это часть задания, чтобы увидеть результат)
+
+document.querySelector("#bad-save-btn").addEventListener("click", function () {
+  localStorage.setItem("bad", { foo: "bar" });
+});
 
 
 
@@ -66,6 +99,18 @@
 // не валидный JSON — вот почему try/catch тут обязателен, если данные могут
 // быть повреждены.
 
+document.querySelector("#bad-load-btn").addEventListener("click", function () {
+  const badRaw = localStorage.getItem("bad");
+  console.log(badRaw);
+
+  try {
+    JSON.parse(badRaw);
+  } catch (error) {
+    document.querySelector("#bad-output").textContent =
+      "Не удалось разобрать JSON: испорченные данные";
+  }
+});
+
 
 
 // --- Задача уровня собеседования ---
@@ -75,5 +120,11 @@
 // требует JSON.stringify/JSON.parse — что будет, если положить туда объект
 // напрямую, и почему localStorage в принципе не может хранить "живые"
 // JS-объекты?
+
+// Ответ: localStorage — это хранилище строк, любой value там неявно приводится
+// к строке, поэтому объект превращается в "[object Object]" и теряет все
+// данные. JSON.stringify делает из объекта текст с сохранением структуры, а
+// JSON.parse восстанавливает из него настоящий объект. "Живые" объекты с
+// методами и ссылками хранить нельзя — в хранилище попадает только текст.
 
 

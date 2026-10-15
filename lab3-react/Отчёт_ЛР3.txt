@@ -1,0 +1,2750 @@
+Задание 1. DOM и выбор элементов
+
+В задании №1 по теме «Зоомагазин «Лапки»» отработаны основные способы выбора элементов DOM. Заголовок страницы получен через document.getElementById("main-title"), первая карточка — через document.querySelector(".card"), все карточки — через document.querySelectorAll(".card") с выводом их количества. Полученный список перебран через forEach, для каждой карточки заголовок найден вложенным запросом card.querySelector(".card-title"), а его текст выведен в консоль. Кнопка "#buy-btn" и несуществующий элемент "#not-exist" получены через querySelector, результат проверен на null с помощью условия if, ссылки навигации выведены в консоль через querySelectorAll и forEach. Ответ на вопрос о разнице NodeList и HTMLCollection приведён в комментарии в конце файла.
+
+Листинг 1 – Выбор элементов DOM
+
+task1.html
+
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №1: DOM и выбор элементов
+  Вариант 03
+
+  Откройте файл через Live Server (кнопка "Go Live"), консоль смотрите
+  в DevTools браузера (F12 -> вкладка Console). Все TODO — в var03.js.
+
+  Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+</head>
+<body>
+
+  <h1 id="main-title">Зоомагазин «Лапки»</h1>
+
+  <nav class="menu">
+    <a href="#" class="menu-link">Каталог</a>
+    <a href="#" class="menu-link">Акции</a>
+    <a href="#" class="menu-link">Доставка</a>
+  </nav>
+
+  <div class="card">
+    <h2 class="card-title">Корм для кошек</h2>
+    <p class="card-price">650 ₽</p>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">Игрушка-мышка</h2>
+    <p class="card-price">180 ₽</p>
+  </div>
+
+  <div class="card">
+    <h2 class="card-title">Поводок</h2>
+    <p class="card-price">450 ₽</p>
+  </div>
+
+  <ul id="cart-list">
+    <li>Миска</li>
+    <li>Ошейник</li>
+  </ul>
+
+  <button id="buy-btn">Купить</button>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="task1_2.js"></script>
+</body>
+</html>
+
+task1_2.js
+
+// ЛАБОРАТОРНАЯ РАБОТА №3
+// ЗАДАНИЕ №1: DOM и выбор элементов — Вариант 03
+// Тема: Зоомагазин «Лапки». Откройте var03.html через Live Server, консоль — в DevTools (F12).
+
+// --- Лёгкий уровень ---
+
+// TODO 1: getElementById
+// Получите элемент с id="main-title" через document.getElementById
+// и выведите его в консоль (console.log)
+
+// Подсказка: document.getElementById("имя-id") — id передаётся БЕЗ решётки #
+// (в отличие от querySelector, где решётка обязательна).
+
+console.log(document.getElementById("main-title"));
+
+
+
+// TODO 2: querySelector по классу
+// Получите ПЕРВЫЙ элемент с классом "card" через document.querySelector(".card")
+// и выведите его в консоль
+
+// Подсказка: querySelector принимает обычный CSS-селектор строкой — точку
+// перед именем класса указывать НУЖНО (в отличие от getElementById).
+
+console.log(document.querySelector(".card"));
+
+
+
+// --- Средний уровень ---
+
+// TODO 3: querySelectorAll
+// Получите ВСЕ элементы с классом "card" через document.querySelectorAll(".card")
+// Выведите в консоль их количество (свойство .length)
+
+// Подсказка: querySelectorAll возвращает СПИСОК элементов (даже если он один
+// или пустой). У списка есть свойство .length — без скобок, это не метод.
+
+console.log(document.querySelectorAll(".card").length);
+
+
+
+// TODO 4: Перебор списка + вложенный поиск
+// Переберите результат TODO 3 через forEach. Для каждой card найдите ВНУТРИ
+// НЕЁ (не document, а саму card!) элемент с классом "card-title" через
+// card.querySelector(".card-title") и выведите его textContent в консоль
+
+// Подсказка: слова "переберите" и "для каждой" = нужны querySelectorAll + forEach
+// ВМЕСТЕ (одно без другого не сработает). "ВНУТРИ НЕЁ (не document)" =
+// искать нужно через card.querySelector(...), а не document.querySelector(...) —
+// иначе всегда найдёте заголовок ПЕРВОЙ карточки, а не текущей.
+// Структура: document.querySelectorAll(".card").forEach(function(card) { ... });
+
+document.querySelectorAll(".card").forEach(function (card) {
+  console.log(card.querySelector(".card-title").textContent);
+});
+
+
+
+// --- Сложный уровень ---
+
+// TODO 5: Проверка на null
+// Получите кнопку "#buy-btn" через querySelector — выведите в консоль.
+// Затем попробуйте получить несуществующий элемент "#not-exist" — выведите
+// результат в консоль. Оберните использование этого несуществующего элемента
+// в проверку if (el) { ... }, чтобы показать, как правильно защищаться от null
+// (если использовать el.textContent без проверки — код упадёт с ошибкой)
+
+// Подсказка: querySelector возвращает null, если элемент не найден — это НЕ
+// ошибка, а специальное "пустое" значение. null считается "ложным" (falsy),
+// поэтому if (el) { ... } просто не выполнится, когда el === null.
+
+var buyBtn = document.querySelector("#buy-btn");
+console.log(buyBtn);
+
+var missingEl = document.querySelector("#not-exist");
+console.log(missingEl);
+
+if (missingEl) {
+  console.log(missingEl.textContent);
+}
+
+
+
+// TODO 6: querySelectorAll по ссылкам меню
+// Получите все ссылки навигации через querySelectorAll(".menu-link").
+// Выведите в консоль их количество и текст (textContent) каждой ссылки
+
+// Подсказка: тот же паттерн, что и в TODO 4 — сначала querySelectorAll
+// (получаем список), затем forEach (перебираем), внутри — .textContent
+// у текущего элемента цикла.
+
+var menuLinks = document.querySelectorAll(".menu-link");
+console.log(menuLinks.length);
+
+menuLinks.forEach(function (link) {
+  console.log(link.textContent);
+});
+
+
+
+// --- Задача уровня собеседования ---
+
+// TODO 7: NodeList vs HTMLCollection
+// document.querySelectorAll() возвращает NodeList,
+// а document.getElementsByClassName() возвращает HTMLCollection.
+// Опишите в комментарии (2-3 предложения): чем они отличаются с точки
+// зрения "живости" — какая коллекция автоматически обновляется, если
+// после её получения добавить/удалить элемент на странице, а какая
+// остаётся "снимком" на момент вызова?
+
+// Подсказка: представьте, что сразу после document.querySelectorAll(".card")
+// вы добавили на страницу ещё один <div class="card">. Попадёт ли он в уже
+// полученный список? А если бы список получался через
+// document.getElementsByClassName("card")?
+
+// Ответ: document.querySelectorAll() возвращает статический NodeList — это
+// «снимок» DOM на момент вызова, поэтому элемент, добавленный позже, в уже
+// полученный список не попадёт. document.getElementsByClassName() возвращает
+// «живую» HTMLCollection — она автоматически обновляется при любом изменении
+// страницы, и новый .card сразу появится в этой коллекции.
+
+В консоли DevTools последовательно выводятся элемент заголовка, первая карточка, количество карточек, названия товаров, найденная кнопка, значение null для несуществующего элемента, а также количество и тексты ссылок меню. Результат работы представлен на рисунке 1.
+
+Рисунок 1 – Вывод выбранных элементов в консоли DevTools
+
+Задание 2. Изменение содержимого и атрибутов
+
+В задании №2 изменено содержимое и атрибуты элементов страницы. В заголовке #username и описании #bio текст заменён через свойство textContent, в блок #notice через innerHTML вставлен HTML-тег <strong>, который отрисовывается жирным. У изображения #avatar значение alt прочитано через getAttribute, а атрибуты src и alt изменены через setAttribute. У бейджа #status-badge класс badge-offline удалён и добавлен класс badge-online с помощью classList.remove и classList.add, наличие нового класса проверено через classList.contains с выводом результата в консоль. Ответ о разнице textContent и innerHTML приведён в комментарии.
+
+Листинг 2 – Изменение содержимого и атрибутов элементов
+
+task2.html
+
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №2: изменение содержимого и атрибутов
+  Вариант 03
+
+  Все TODO — в var03.js. Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+  <style>
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; }
+    .badge-online { background: #c6f6d5; color: #22543d; }
+    .badge-offline { background: #e2e8f0; color: #4a5568; }
+  </style>
+</head>
+<body>
+
+  <h1 id="username">Гость</h1>
+  <p id="bio">Здесь будет описание.</p>
+
+  <img id="avatar" src="placeholder.jpg" alt="Изображение" width="80">
+
+  <div id="status-badge" class="badge badge-offline">Нет в наличии</div>
+
+  <div id="notice"></div>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="task2_2.js"></script>
+</body>
+</html>
+
+task2_2.js
+
+// ЛАБОРАТОРНАЯ РАБОТА №3
+// ЗАДАНИЕ №2: изменение содержимого и атрибутов — Вариант 03
+// Тема: Зоомагазин «Лапки». Откройте var03.html через Live Server.
+
+// --- Лёгкий уровень ---
+
+// TODO 1: textContent
+// Получите элемент #username и через textContent замените текст на
+// название Зоомагазин «Лапки»
+
+// Подсказка: textContent — это свойство (не метод, без скобок), просто
+// присвойте ему новую строку: element.textContent = "текст";
+
+document.querySelector("#username").textContent = "Зоомагазин «Лапки»";
+
+
+
+// TODO 2: textContent
+// Получите элемент #bio и через textContent замените текст на любое
+// описание, связанное с темой Зоомагазин «Лапки»
+
+// Подсказка: тот же приём, что и в TODO 1 — просто другой элемент и текст.
+
+document.querySelector("#bio").textContent =
+  "Всё для ухода за питомцами: корма, игрушки и аксессуары.";
+
+
+
+// --- Средний уровень ---
+
+// TODO 3: innerHTML
+// Получите элемент #notice и через innerHTML вставьте строку с HTML-тегом,
+// например "<strong>Внимание!</strong> Информация обновлена."
+// (тег <strong> должен реально отрисоваться жирным на странице)
+
+// Подсказка: innerHTML тоже присваивается строкой (element.innerHTML = "..."),
+// но, в отличие от textContent, теги внутри строки реально отрисуются как
+// разметка, а не как обычный видимый текст.
+
+document.querySelector("#notice").innerHTML =
+  "<strong>Внимание!</strong> Информация обновлена.";
+
+
+
+// TODO 4: setAttribute / getAttribute
+// Получите элемент #avatar. Выведите в консоль его текущий "alt" через
+// getAttribute. Затем через setAttribute поменяйте "src" на любую другую
+// строку (например "photo2.jpg") и "alt" на новое описание
+
+// Подсказка: getAttribute("имя") — читает (со скобками, имя атрибута строкой).
+// setAttribute("имя", "значение") — записывает (два аргумента строками).
+// Оба работают с ЛЮБЫМ атрибутом, не только с src/alt.
+
+var avatar = document.querySelector("#avatar");
+console.log(avatar.getAttribute("alt"));
+avatar.setAttribute("src", "photo2.jpg");
+avatar.setAttribute("alt", "Фото товара из зоомагазина «Лапки»");
+
+
+
+// --- Сложный уровень ---
+
+// TODO 5: classList.add/remove
+// Получите #status-badge. Уберите класс "badge-offline" и добавьте
+// "badge-online" (используйте classList.remove и classList.add — ДВА
+// действия, не toggle, т.к. классы разные, не один и тот же вкл/выкл)
+
+// Подсказка: classList.remove("класс") и classList.add("класс") — оба
+// принимают имя класса строкой, БЕЗ точки перед именем.
+
+var statusBadge = document.querySelector("#status-badge");
+statusBadge.classList.remove("badge-offline");
+statusBadge.classList.add("badge-online");
+
+
+
+// TODO 6: classList.contains
+// Получите #status-badge ещё раз. Проверьте через if и classList.contains,
+// есть ли у него класс "badge-online" — выведите в консоль true или false
+
+// Подсказка: classList.contains("имя-класса") возвращает true/false —
+// удобно использовать прямо внутри if (el.classList.contains("...")) { ... }
+
+var badgeAgain = document.querySelector("#status-badge");
+if (badgeAgain.classList.contains("badge-online")) {
+  console.log(true);
+} else {
+  console.log(false);
+}
+
+
+
+// --- Задача уровня собеседования ---
+
+// TODO 7: textContent vs innerHTML
+// Опишите в комментарии (2-3 предложения): в чём разница между textContent
+// и innerHTML, и почему для вывода текста от пользователя (например,
+// комментария) обычно безопаснее использовать textContent, а не innerHTML?
+
+// Подсказка: подумайте, что произойдёт, если пользователь введёт в
+// комментарий текст с символами < и >, например <script>...</script> — как
+// его обработает innerHTML, а как textContent?
+
+// Ответ: textContent записывает и читает только текст, все символы вроде < и >
+// остаются обычными видимыми знаками, а innerHTML разбирает их как HTML-теги.
+// Если выводить через innerHTML введённый пользователем текст, то тег
+// <script>...</script> попадёт в разметку и выполнится — это XSS-уязвимость.
+// Поэтому для текста от пользователя безопаснее textContent: он ничего не
+// исполняет и всегда показывает строку как есть.
+
+Страница отображает новые заголовок и описание, уведомление выделено жирным, изображение подменено, а бейдж переведён в состояние «В наличии». Результат работы представлен на рисунке 2.
+
+Рисунок 2 – Страница с изменённым содержимым и атрибутами
+
+Задание 3. Стили через JS
+
+В задании №3 стили элементов заданы из JavaScript. Элементу #js-box через свойства element.style установлены фоновый цвет orange, ширина 150px, высота 80px, рамка 2px solid black и скругление углов 10px. У элемента #preset-box, стилизованного CSS-классом .preset, выведено в консоль инлайн-свойство style.backgroundColor (пустая строка) и реальные значения цвета и ширины, полученные через функцию getComputedStyle. Ответ о разнице element.style и getComputedStyle приведён в комментарии.
+
+Листинг 3 – Задание стилей через JavaScript
+
+task3.html
+
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №3: стили через JS
+  Вариант 03
+
+  Все TODO — в var03.js. Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+  <style>
+    .preset {
+      width: 120px;
+      height: 60px;
+      background-color: teal;
+      border-radius: 8px;
+    }
+    #js-box {
+      width: 120px;
+      height: 60px;
+      border: 1px solid #999;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Зоомагазин «Лапки»</h1>
+
+  <div id="preset-box" class="preset"></div>
+
+  <div id="js-box"></div>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="task3_2.js"></script>
+</body>
+</html>
+
+task3_2.js
+
+// ЛАБОРАТОРНАЯ РАБОТА №3
+// ЗАДАНИЕ №3: стили через JS — Вариант 03
+// Тема: Зоомагазин «Лапки». Откройте var03.html через Live Server.
+
+// --- Лёгкий уровень ---
+
+// TODO 1: element.style
+// Получите #js-box и через style.backgroundColor задайте ему фон "orange"
+
+// Подсказка: element.style.свойство = "значение" — имя свойства пишется
+// camelCase (backgroundColor), а не через дефис, как в CSS-файле
+// (background-color).
+
+var jsBox = document.querySelector("#js-box");
+jsBox.style.backgroundColor = "orange";
+
+
+
+// TODO 2: element.style + единицы измерения
+// Задайте #js-box ширину 150px и высоту 80px через style.width / style.height
+// (не забудьте "px" в строке!)
+
+// Подсказка: box.style.width = 150 (число без единиц) просто не сработает —
+// нужна строка с единицей измерения: box.style.width = "150px".
+
+jsBox.style.width = "150px";
+jsBox.style.height = "80px";
+
+
+
+// --- Средний уровень ---
+
+// TODO 3: несколько свойств сразу
+// Задайте #js-box borderRadius "10px" и border "2px solid black"
+
+// Подсказка: просто две отдельные строки кода, каждая — своё свойство style,
+// как в TODO 1 и 2, друг за другом.
+
+jsBox.style.borderRadius = "10px";
+jsBox.style.border = "2px solid black";
+
+
+
+// TODO 4: element.style на элементе со стилями из CSS-класса
+// Получите #preset-box (у него стиль задан через class="preset" в CSS).
+// Выведите в консоль preset-box.style.backgroundColor — что вывелось и почему?
+
+// Подсказка: element.style показывает ТОЛЬКО инлайн-стили (заданные прямо
+// через JS или атрибут style="..."). Стили из CSS-класса через него не видны —
+// поэтому результат может вас удивить.
+
+console.log(document.querySelector("#preset-box").style.backgroundColor);
+
+
+
+// --- Сложный уровень ---
+
+// TODO 5: getComputedStyle
+// Через getComputedStyle(document.querySelector("#preset-box")) получите
+// РЕАЛЬНЫЙ применённый backgroundColor и выведите в консоль. Сравните с TODO 4
+
+// Подсказка: getComputedStyle(element) — это обычная функция (не метод
+// самого элемента!), вызывается отдельно: getComputedStyle(el), а не
+// el.getComputedStyle().
+
+console.log(getComputedStyle(document.querySelector("#preset-box")).backgroundColor);
+
+
+
+// TODO 6: getComputedStyle — ширина
+// Тем же способом получите и выведите реальную ширину (width) #preset-box
+
+// Подсказка: getComputedStyle(element) возвращает объект со ВСЕМИ реальными
+// применёнными стилями, независимо от того, инлайн они, из класса или из
+// стилей браузера по умолчанию.
+
+console.log(getComputedStyle(document.querySelector("#preset-box")).width);
+
+
+
+// --- Задача уровня собеседования ---
+
+// TODO 7: element.style vs getComputedStyle
+// Опишите в комментарии (2-3 предложения): почему в TODO 4
+// element.style.backgroundColor вывел пустую строку, а в TODO 5
+// getComputedStyle вывел реальный цвет? В чём принципиальная разница между
+// этими двумя способами?
+
+// Ответ: element.style читает ТОЛЬКО инлайн-стили элемента (атрибут style
+// или заданные через JS), а цвет, пришедший из CSS-класса, там пустой —
+// отсюда и пустая строка в TODO 4. getComputedStyle возвращает итоговые
+// вычисленные стили после применения всех источников: инлайн, CSS-классов,
+// стилей родителей и значений по умолчанию.
+
+Блок #js-box отображается оранжевым размером 150 на 80 пикселей со скруглённой рамкой, а в консоли видно различие между инлайн-стилем и вычисленным стилем элемента. Результат работы представлен на рисунке 3.
+
+Рисунок 3 – Блок, стилизованный через JS, и вывод getComputedStyle
+
+Задание 4. События (addEventListener)
+
+В задании №4 обработаны события браузера. На кнопку #like-btn повешены два независимых click-обработчика: первый меняет текст кнопки на «❤️ Нравится», второй увеличивает число в #counter на единицу. Форма #demo-form подписана на событие submit, внутри вызван event.preventDefault(), а значение поля #name-input выведено в #form-result через textContent. Поле ввода подписано на событие input и отображает текущее значение в #live-preview. На список #color-list повешен один обработчик click, который через event.target и getAttribute читает атрибут data-color и записывает его в #clicked-color. На document подписан обработчик keydown, выводящий event.key в консоль. Ответ о разнице между ссылкой на функцию и её вызовом приведён в комментарии.
+
+Листинг 4 – Обработка событий через addEventListener
+
+task4.html
+
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №4: события (addEventListener)
+  Вариант 03
+
+  Все TODO — в var03.js. Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+</head>
+<body>
+
+  <h1>Зоомагазин «Лапки»</h1>
+
+  <button id="like-btn">🤍 Нравится</button>
+  <div id="counter">0</div>
+
+  <form id="demo-form">
+    <input id="name-input" type="text" placeholder="Введите ваше имя">
+    <button type="submit">Отправить</button>
+  </form>
+  <div id="form-result"></div>
+  <p id="live-preview"></p>
+
+  <ul id="color-list">
+    <li data-color="red">Красный</li>
+    <li data-color="green">Зелёный</li>
+    <li data-color="blue">Синий</li>
+  </ul>
+  <div id="clicked-color"></div>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="task4_2.js"></script>
+</body>
+</html>
+
+task4_2.js
+
+// ЛАБОРАТОРНАЯ РАБОТА №3
+// ЗАДАНИЕ №4: события (addEventListener) — Вариант 03
+// Тема: Зоомагазин «Лапки». Откройте var03.html через Live Server.
+
+// --- Лёгкий уровень ---
+
+// TODO 1: клик меняет свой же текст
+// Получите #like-btn. Через addEventListener("click", ...) при клике
+// меняйте его textContent на "❤️ Нравится"
+
+// Подсказка: addEventListener("click", function() {...}) — функция внутри
+// НЕ вызывается сразу, браузер сам вызовет её при каждом клике.
+
+var likeBtn = document.querySelector("#like-btn");
+
+likeBtn.addEventListener("click", function () {
+  likeBtn.textContent = "❤️ Нравится";
+});
+
+
+
+// TODO 2: второй обработчик на ТОТ ЖЕ элемент
+// На тот же #like-btn повесьте ЕЩЁ ОДИН addEventListener("click", ...)
+// (да, можно несколько на одном элементе — оба сработают на каждый клик).
+// В нём увеличивайте число в #counter на 1 при каждом клике
+// (Number(counterEl.textContent) + 1, затем запишите обратно через textContent)
+
+// Подсказка: addEventListener можно вызвать на одном элементе НЕСКОЛЬКО раз —
+// каждый обработчик сработает независимо, в отличие от btn.onclick, где новый
+// обработчик заменил бы предыдущий.
+
+var counterEl = document.querySelector("#counter");
+
+likeBtn.addEventListener("click", function () {
+  counterEl.textContent = Number(counterEl.textContent) + 1;
+});
+
+
+
+// --- Средний уровень ---
+
+// TODO 3: submit формы + preventDefault
+// Получите #demo-form. Подпишитесь на "submit", внутри вызовите
+// event.preventDefault(), затем возьмите значение поля #name-input
+// (свойство .value, не textContent!) и выведите его в #form-result через textContent
+
+// Подсказка: event.preventDefault() вызывается как метод именно у объекта
+// event — того самого, что браузер передаёт первым параметром в функцию-
+// обработчик: function(event) { event.preventDefault(); ... }
+
+var demoForm = document.querySelector("#demo-form");
+
+demoForm.addEventListener("submit", function (event) {
+  event.preventDefault();
+  document.querySelector("#form-result").textContent =
+    document.querySelector("#name-input").value;
+});
+
+
+
+// TODO 4: событие "input" — живой предпросмотр
+// Получите #name-input. Подпишитесь на "input" (срабатывает на каждый ввод
+// символа). Внутри записывайте текущее значение поля (.value) в
+// #live-preview через textContent
+
+// Подсказка: событие "input" вешается на САМО ПОЛЕ (не на форму!) и
+// срабатывает при КАЖДОМ изменении текста — не путайте с "submit" из TODO 3,
+// который висит на форме и срабатывает один раз при отправке.
+
+var nameInput = document.querySelector("#name-input");
+
+nameInput.addEventListener("input", function () {
+  document.querySelector("#live-preview").textContent = nameInput.value;
+});
+
+
+
+// --- Сложный уровень ---
+
+// TODO 5: один обработчик на список — event.target
+// Получите #color-list (сам <ul>, не отдельные <li>!). Повесьте ОДИН
+// addEventListener на "click". Внутри через event.target получите элемент,
+// на котором кликнули, прочитайте его атрибут "data-color" через
+// getAttribute, и запишите в #clicked-color
+
+// Подсказка: клик по <li> всплывает и до <ul> тоже — событие "click" на <ul>
+// сработает, а event.target внутри обработчика укажет именно на <li>, по
+// которому кликнули, а не на сам <ul>.
+
+document.querySelector("#color-list").addEventListener("click", function (event) {
+  document.querySelector("#clicked-color").textContent =
+    event.target.getAttribute("data-color");
+});
+
+
+
+// TODO 6: keydown на всём документе
+// Подпишитесь на "keydown" на document (а не на конкретном элементе).
+// В обработчике выведите в консоль event.key — какая клавиша была нажата
+
+// Подсказка: document — уже готовый глобальный объект (вся страница целиком),
+// его не нужно "искать" через querySelector, в отличие от обычных элементов.
+
+document.addEventListener("keydown", function (event) {
+  console.log(event.key);
+});
+
+
+
+// --- Задача уровня собеседования ---
+
+// TODO 7: ссылка на функцию vs вызов функции
+// Опишите в комментарии (2-3 предложения): почему
+// btn.addEventListener("click", doSomething()) — ошибка (сработает сразу,
+// один раз, при загрузке страницы), а
+// btn.addEventListener("click", doSomething) — правильно (сработает при клике)?
+// В чём разница между этими двумя записями?
+
+// Ответ: doSomething() — это ВЫЗОВ функции, её результат (обычно undefined)
+// передаётся в addEventListener как обработчик, а сама функция выполняется
+// один раз прямо в момент загрузки страницы. doSomething без скобок — это
+// ссылка на функцию, браузер сохранит её и будет вызывать при каждом клике.
+
+Клик по кнопке меняет её текст и увеличивает счётчик, ввод в поле отражается в живом предпросмотре, отправка формы выводит имя без перезагрузки страницы, а клик по цвету и нажатие клавиш фиксируются в консоли. Результат работы представлен на рисунке 4.
+
+Рисунок 4 – Реакция страницы на события пользователя
+
+Задание 5. Всплытие и делегирование событий
+
+В задании №5 разобраны всплытие событий и делегирование. На блоки #outer и #inner подписаны отдельные click-обработчики, порядок их срабатывания и разница между event.target и event.currentTarget выводятся в консоль. На список задач #todo-list повешен один обработчик с делегированием: в начале выполняется проверка event.target.closest("li") на null, затем по классу delete-btn найденный пункт удаляется через remove, а по остальной части пункта переключается класс done через classList.toggle. На #inner добавлен обработчик с event.stopPropagation(), останавливающий всплытие. Ответ о назначении делегирования приведён в комментарии.
+
+Листинг 5 – Всплытие событий и делегирование
+
+task5.html
+
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №5: всплытие и делегирование событий
+  Вариант 03
+
+  Все TODO — в var03.js. Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+  <style>
+    #outer { padding: 24px; border: 2px solid #333; }
+    #inner { padding: 24px; border: 2px solid tomato; margin-top: 10px; }
+    .done { text-decoration: line-through; color: #888; }
+    #todo-list { list-style: none; padding: 0; }
+    #todo-list li { padding: 6px 0; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <h1>Зоомагазин «Лапки»</h1>
+
+  <div id="outer">
+    Внешний блок
+    <div id="inner">Внутренний блок (кликните сюда)</div>
+  </div>
+
+  <ul id="todo-list">
+    <li data-id="1"><span class="todo-text">Покормить питомцев</span> <button class="delete-btn">✕</button></li>
+    <li data-id="2"><span class="todo-text">Заказать корм</span> <button class="delete-btn">✕</button></li>
+    <li data-id="3"><span class="todo-text">Убрать вольеры</span> <button class="delete-btn">✕</button></li>
+  </ul>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="task5_2.js"></script>
+</body>
+</html>
+
+task5_2.js
+
+// ЛАБОРАТОРНАЯ РАБОТА №3
+// ЗАДАНИЕ №5: всплытие и делегирование событий — Вариант 03
+// Тема: Зоомагазин «Лапки». Список задач "todo-list" — рабочие дела по теме
+// варианта (Покормить питомцев, Заказать корм, Убрать вольеры). Откройте var03.html через Live Server.
+
+// --- Лёгкий уровень ---
+
+// TODO 1: всплытие (bubbling)
+// Получите #outer и #inner. Повесьте на КАЖДЫЙ свой click-обработчик,
+// который просто выводит в консоль "клик по outer" / "клик по inner".
+// Кликните по #inner (внутреннему блоку) — посмотрите порядок сообщений
+
+// Подсказка: всплытие значит, что событие сначала срабатывает на самом
+// глубоком элементе (там, где реально кликнули), а затем поднимается вверх
+// по всем родителям — если у них есть свои обработчики, они тоже сработают.
+
+document.querySelector("#outer").addEventListener("click", function () {
+  console.log("клик по outer");
+});
+
+document.querySelector("#inner").addEventListener("click", function () {
+  console.log("клик по inner");
+});
+
+
+
+// TODO 2: event.target vs event.currentTarget
+// В обработчике #outer (из TODO 1 или новом) выведите в консоль
+// event.target.id и event.currentTarget.id. Кликните то по #outer, то по
+// #inner — сравните, что меняется, а что всегда одно и то же
+
+// Подсказка: event.target — элемент, где РЕАЛЬНО произошёл клик (может
+// меняться от клика к клику). event.currentTarget — элемент, на котором
+// висит именно этот обработчик (здесь — всегда #outer, не меняется).
+
+document.querySelector("#outer").addEventListener("click", function (event) {
+  console.log(event.target.id);
+  console.log(event.currentTarget.id);
+});
+
+
+
+// --- Средний уровень ---
+
+// TODO 3: делегирование — удаление задачи
+// Повесьте ОДИН addEventListener("click", ...) на #todo-list.
+// Внутри проверьте: если event.target имеет класс "delete-btn"
+// (event.target.classList.contains("delete-btn")) — найдите ближайший <li>
+// через event.target.closest("li") и удалите его через .remove()
+
+// Подсказка: вешаем ОДИН addEventListener на #todo-list (родителя), а не на
+// каждую кнопку. Внутри event.target — это именно та кнопка, по которой
+// кликнули (не сам #todo-list) — событие всплыло от кнопки до родителя.
+
+
+
+// TODO 4: делегирование — отметить как выполненное
+// В ТОМ ЖЕ обработчике (или новом на #todo-list): если кликнули НЕ по
+// delete-btn, а по остальной части <li> — найдите этот <li> через
+// event.target.closest("li") и переключите ему класс "done" через
+// classList.toggle("done") (текст станет зачёркнутым — стиль уже есть в CSS)
+
+// Подсказка: закройте первую проверку через else — если это delete-btn,
+// удаляем; иначе — переключаем класс done у ближайшего li. Важно
+// переключать класс именно у li (через closest), а не у event.target
+// напрямую — иначе при клике по <span> класс попадёт на span, а не на весь
+// пункт списка.
+
+document.querySelector("#todo-list").addEventListener("click", function (event) {
+  var item = event.target.closest("li");
+
+  if (item === null) {
+    return;
+  }
+
+  if (event.target.classList.contains("delete-btn")) {
+    item.remove();
+  } else {
+    item.classList.toggle("done");
+  }
+});
+
+
+
+// --- Сложный уровень ---
+
+// TODO 5: stopPropagation
+// Получите #inner заново (или используйте из TODO 1). Добавьте ЕЩЁ ОДИН
+// обработчик клика на #inner, который вызывает event.stopPropagation().
+// Проверьте: теперь при клике по #inner обработчик #outer из TODO 1 больше
+// не срабатывает
+
+// Подсказка: event.stopPropagation() вызывается на объекте event так же, как
+// event.preventDefault() из темы 4 — но останавливает не действие браузера
+// по умолчанию, а само всплытие события вверх по родителям.
+
+document.querySelector("#inner").addEventListener("click", function (event) {
+  event.stopPropagation();
+});
+
+
+
+// TODO 6: защита от клика "в пустоту"
+// В обработчике на #todo-list (TODO 3/4) добавьте в начало проверку: если
+// event.target.closest("li") равен null (кликнули по пустому месту списка,
+// не по конкретной задаче) — просто return, ничего не делать дальше
+
+// Подсказка: closest() возвращает null, если подходящего родителя не
+// нашлось — это тот же принцип null-проверки, что был в теме 1 с querySelector.
+// (проверка if (item === null) return стоит в начале обработчика #todo-list выше
+// — в TODO 3/4)
+
+
+
+// --- Задача уровня собеседования ---
+
+// TODO 7: зачем нужно делегирование
+// Опишите в комментарии (2-3 предложения): в чём разница между event.target
+// и event.currentTarget, и почему вешать ОДИН обработчик на родителя
+// (делегирование) часто лучше, чем вешать отдельный обработчик на каждый
+// дочерний элемент — особенно если элементы могут добавляться на страницу
+// позже?
+
+// Ответ: event.target — это элемент, на котором реально произошло событие,
+// event.currentTarget — элемент, на котором висит обработчик. При
+// делегировании один обработчик на родителя ловит клики по всем текущим и
+// будущим детям, поэтому не нужно вешать обработчики на каждый <li>
+// отдельно и переустанавливать их после добавления новых элементов.
+
+Клик по внутреннему блоку сначала обрабатывается на нём самом, а затем всплывает к внешнему; кнопка «✕» удаляет пункт списка, клик по тексту зачёркивает его, клик по пустому месту списка игнорируется, а обработчик с stopPropagation не даёт событию дойти до родителя. Результат работы представлен на рисунке 5.
+
+Рисунок 5 – Порядок всплытия и работа делегирования
+
+Задание 6. Создание и удаление элементов
+
+В задании №6 созданы и удалены элементы списка. Элемент <p> создан через document.createElement, ему задан текст «Привет!», он выведен в консоль и добавлен в #sandbox через appendChild. По кнопке «Добавить в конец» создаётся <li> с текстом из поля ввода и добавляется в #todo-list через appendChild, поле ввода очищается, а пустые значения игнорируются. По кнопке «Добавить в начало» элемент добавляется через prepend. Вместе с каждым <li> создаётся кнопка «✕» с классом delete-btn, она вставляется внутрь пункта до его добавления в список и сразу получает собственный обработчик, вызывающий li.remove(). Ответ о выборе между прямым обработчиком и делегированием приведён в комментарии.
+
+Листинг 6 – Создание и удаление элементов списка
+
+task6.html
+
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №6: создание и удаление элементов
+  Вариант 03
+
+  Все TODO — в var03.js. Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+  <style>
+    #todo-list { list-style: none; padding: 0; }
+    #todo-list li { padding: 6px 0; }
+    .delete-btn { margin-left: 8px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <h1>Зоомагазин «Лапки»</h1>
+
+  <div id="sandbox"></div>
+
+  <input id="new-task-input" type="text" placeholder="Новая запись: товар">
+  <button id="add-task-btn">Добавить в конец</button>
+  <button id="add-task-top-btn">Добавить в начало</button>
+
+  <ul id="todo-list"></ul>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="task6_2.js"></script>
+</body>
+</html>
+
+task6_2.js
+
+// ЛАБОРАТОРНАЯ РАБОТА №3
+// ЗАДАНИЕ №6: создание и удаление элементов — Вариант 03
+// Тема: Зоомагазин «Лапки». Откройте var03.html через Live Server.
+
+// --- Лёгкий уровень ---
+
+// TODO 1: createElement без вставки
+// Получите #sandbox. Через document.createElement("p") создайте новый <p>,
+// задайте ему textContent "Привет!" и выведите его в консоль.
+// НЕ вставляйте его никуда. Посмотрите на страницу — элемент появился?
+// Почему?
+
+// Подсказка: document.createElement("тег") создаёт элемент только в памяти
+// JS — на странице его не видно, пока не вставите через appendChild/prepend.
+
+var sandbox = document.querySelector("#sandbox");
+var greeting = document.createElement("p");
+greeting.textContent = "Привет!";
+console.log(greeting);
+
+
+
+// TODO 2: appendChild
+// Тот же созданный элемент (или новый) добавьте в #sandbox через appendChild.
+// Теперь посмотрите на страницу — должен появиться реально
+
+// Подсказка: parent.appendChild(el) добавляет el ПОСЛЕДНИМ ребёнком внутрь
+// parent — только после этого элемент реально появляется на странице.
+
+sandbox.appendChild(greeting);
+
+
+
+// --- Средний уровень ---
+
+// TODO 3: полный рецепт по кнопке
+// Получите #add-task-btn и #new-task-input. Повесьте на кнопку "click":
+// внутри создайте <li>, задайте textContent = значение поля (.value),
+// и добавьте его в #todo-list через appendChild
+
+// Подсказка: рецепт из 3 шагов — создать (createElement) → настроить
+// (textContent/атрибуты) → вставить (appendChild). Все три шага обязательны.
+
+
+
+// TODO 4: очистка поля после добавления
+// В ТОМ ЖЕ обработчике из TODO 3 — после appendChild очистите поле ввода
+// (input.value = ""), чтобы можно было сразу вводить следующую запись
+
+// Подсказка: если поле пустое (пользователь ничего не ввёл), не стоит
+// добавлять пустой <li> — можно обернуть весь код в if (input.value !== "")
+
+var addTaskBtn = document.querySelector("#add-task-btn");
+var addTaskTopBtn = document.querySelector("#add-task-top-btn");
+var newTaskInput = document.querySelector("#new-task-input");
+var todoList = document.querySelector("#todo-list");
+
+addTaskBtn.addEventListener("click", function () {
+  if (newTaskInput.value === "") {
+    return;
+  }
+
+  var li = document.createElement("li");
+  li.textContent = newTaskInput.value;
+
+  var deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "✕";
+  deleteBtn.classList.add("delete-btn");
+  deleteBtn.addEventListener("click", function () {
+    li.remove();
+  });
+  li.appendChild(deleteBtn);
+
+  todoList.appendChild(li);
+  newTaskInput.value = "";
+});
+
+
+
+// --- Сложный уровень ---
+
+// TODO 5: prepend — добавление в начало
+// Получите #add-task-top-btn. Повесьте "click": по такому же рецепту
+// создайте <li> с текстом из #new-task-input, но добавьте его через prepend
+// (не appendChild) — новая запись должна оказаться ПЕРВОЙ в списке
+
+// Подсказка: prepend работает так же, как appendChild, но вставляет элемент
+// ПЕРВЫМ ребёнком, а не последним — остальной код можно скопировать из TODO 3.
+
+addTaskTopBtn.addEventListener("click", function () {
+  if (newTaskInput.value === "") {
+    return;
+  }
+
+  var li = document.createElement("li");
+  li.textContent = newTaskInput.value;
+
+  var deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "✕";
+  deleteBtn.classList.add("delete-btn");
+  deleteBtn.addEventListener("click", function () {
+    li.remove();
+  });
+  li.appendChild(deleteBtn);
+
+  todoList.prepend(li);
+  newTaskInput.value = "";
+});
+
+
+
+// TODO 6: удаление созданного элемента напрямую (без делегирования)
+// Доработайте TODO 3 (или TODO 5): вместе с <li> создайте ещё и <button> с
+// текстом "✕" и классом "delete-btn", добавьте его ВНУТРЬ <li>
+// (li.appendChild(deleteBtn) ПЕРЕД тем как li добавляется в список). У ЭТОЙ
+// кнопки сразу же, пока у вас есть прямая ссылка на неё, повесьте свой
+// click-обработчик, который вызывает li.remove()
+
+// Подсказка: тут делегирование не нужно — вы только что сами создали и
+// кнопку, и li, ссылки на оба элемента уже есть в переменных.
+// (кнопка "✕" создаётся и получает свой обработчик li.remove() внутри
+// обработчиков кнопок добавления выше — в TODO 3 и TODO 5)
+
+
+
+// --- Задача уровня собеседования ---
+
+// TODO 7: прямой обработчик vs делегирование
+// Опишите в комментарии (2-3 предложения): почему для СВЕЖЕСОЗДАННОГО
+// элемента (как в TODO 6) логично повесить обработчик прямо на него, а
+// делегирование (тема 5, один обработчик на родителя) больше подходит для
+// элементов, которые уже есть на странице в большом количестве или
+// добавляются откуда-то ещё?
+
+// Ответ: для свежесозданного элемента у нас уже есть прямые ссылки на него и
+// на кнопку, поэтому повесить обработчик прямо сейчас проще всего — новых
+// элементов-братьев этот обработчик не затронет. Делегирование же экономит
+// память и время на большом списке: один обработчик на родителя обслуживает и
+// уже существующие, и появляющиеся позже элементы, пока их много.
+
+Новые записи появляются в конце и в начале списка, поле ввода очищается после добавления, а созданная вместе с пунктом кнопка «✕» удаляет именно этот пункт. Результат работы представлен на рисунке 6.
+
+Рисунок 6 – Добавление и удаление элементов списка
+
+Задание 7. Работа с формами
+
+В задании №7 обработана регистрационная форма. На форму #reg-form подписан один обработчик submit с event.preventDefault(). В его начале проверяется, не пустое ли имя: при пустом значении в #error-message записывается «Введите имя» и выполнение прекращается через return. Далее проверяется состояние чекбокса #agree-checkbox через свойство checked — при отсутствии согласия выводится сообщение «Нужно согласиться с условиями» и снова выполняется return. Если обе проверки пройдены, сообщение об ошибке очищается, а в консоль выводятся значение текстового поля, состояние чекбокса, значение выбранной радиокнопки, найденной селектором 'input[name="account-type"]:checked', и значение выпадающего списка. Ответ о свойствах чекбокса приведён в комментарии.
+
+Листинг 7 – Обработка и валидация формы
+
+task7.html
+
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №7: работа с формами
+  Вариант 03
+
+  Все TODO — в var03.js. Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+  <style>
+    #error-message { color: red; }
+  </style>
+</head>
+<body>
+
+  <h1>Зоомагазин «Лапки» — регистрация</h1>
+
+  <form id="reg-form">
+    <div>
+      <input type="text" id="username-field" placeholder="Ваше имя">
+    </div>
+    <div>
+      <label><input type="checkbox" id="agree-checkbox"> Согласен с условиями</label>
+    </div>
+    <fieldset>
+      <legend>Тип аккаунта</legend>
+      <label><input type="radio" name="account-type" value="personal" checked> Личный</label>
+      <label><input type="radio" name="account-type" value="business"> Бизнес</label>
+    </fieldset>
+    <div>
+      <select id="country-select">
+        <option value="ru">Россия</option>
+        <option value="by">Беларусь</option>
+        <option value="kz">Казахстан</option>
+      </select>
+    </div>
+    <button type="submit">Зарегистрироваться</button>
+  </form>
+
+  <div id="error-message"></div>
+  <div id="result"></div>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="task7_2.js"></script>
+</body>
+</html>
+
+task7_2.js
+
+// ЛАБОРАТОРНАЯ РАБОТА №3
+// ЗАДАНИЕ №7: работа с формами — Вариант 03
+// Тема: Зоомагазин «Лапки». Откройте var03.html через Live Server.
+
+const form = document.querySelector("#reg-form");
+
+// --- Лёгкий уровень ---
+
+// TODO 1: текстовое поле
+// Получите #username-field. Подпишитесь на "submit" формы (не забудьте
+// event.preventDefault()), внутри выведите в консоль username.value
+
+// Подсказка: событие "submit" вешается на САМУ ФОРМУ (form, которая уже
+// получена в переменную form выше), а не на поле ввода — у полей ввода
+// такого события нет, оно не сработает.
+
+const usernameField = document.querySelector("#username-field");
+const agreeCheckbox = document.querySelector("#agree-checkbox");
+const countrySelect = document.querySelector("#country-select");
+const errorBox = document.querySelector("#error-message");
+
+form.addEventListener("submit", function (event) {
+  event.preventDefault();
+
+  if (usernameField.value === "") {
+    errorBox.textContent = "Введите имя";
+    return;
+  }
+
+  if (!agreeCheckbox.checked) {
+    errorBox.textContent = "Нужно согласиться с условиями";
+    return;
+  }
+
+  errorBox.textContent = "";
+
+  console.log(usernameField.value);
+  console.log(agreeCheckbox.checked);
+  console.log(document.querySelector('input[name="account-type"]:checked').value);
+  console.log(countrySelect.value);
+});
+
+
+
+// TODO 2: чекбокс — .checked, а не .value!
+// В ТОМ ЖЕ обработчике получите #agree-checkbox и выведите в консоль его .checked
+
+// Подсказка: checkbox.value почти всегда просто "on" — бесполезно. Нужно
+// именно .checked (true/false)
+// (console.log(agreeCheckbox.checked) — в общем обработчике выше, в TODO 1)
+
+
+
+// --- Средний уровень ---
+
+// TODO 3: радиокнопки — :checked
+// В ТОМ ЖЕ обработчике получите выбранную радиокнопку через
+// document.querySelector('input[name="account-type"]:checked')
+// и выведите в консоль её .value
+
+// Подсказка: 'input[name="account-type"]:checked' — это ОДИН CSS-селектор:
+// сначала фильтр по атрибуту name, затем псевдокласс :checked (только
+// отмеченный элемент). querySelector найдёт ровно ту радиокнопку, что выбрана.
+// (console.log радиокнопки — в общем обработчике выше, в TODO 1)
+
+
+
+// TODO 4: select
+// В ТОМ ЖЕ обработчике получите #country-select и выведите в консоль его .value
+
+// Подсказка: у select всё так же просто, как у текстового поля — обычное
+// .value, никаких новых приёмов не нужно.
+// (console.log(countrySelect.value) — в общем обработчике выше, в TODO 1)
+
+
+
+// --- Сложный уровень ---
+
+// TODO 5: валидация — обязательное поле
+// В САМОМ НАЧАЛЕ обработчика (сразу после preventDefault) проверьте: если
+// #username-field.value === "" — запишите в #error-message textContent
+// "Введите имя" и сделайте return (дальше код выполняться не должен)
+
+// Подсказка: тот же принцип, что и с null-проверками в теме 1 — если условие
+// (пустая строка) верно, выполняем действие и сразу return, чтобы код ниже
+// не выполнился на невалидных данных.
+// (проверка стоит сразу после preventDefault в общем обработчике выше — в TODO 1)
+
+
+
+// TODO 6: валидация — согласие с условиями
+// После проверки из TODO 5 (если поле не пустое) добавьте вторую проверку:
+// если #agree-checkbox НЕ отмечен — запишите в #error-message
+// "Нужно согласиться с условиями" и return. Если обе проверки прошли —
+// очистите #error-message (errorBox.textContent = "")
+
+// Подсказка: проверки идут одна за другой — сначала имя, потом чекбокс.
+// Если первая проверка сработала (return) — до второй дело не дойдёт.
+// (вторая проверка и очистка errorBox.textContent = "" — там же, в TODO 1)
+
+
+
+// --- Задача уровня собеседования ---
+
+// TODO 7: почему не .value у чекбокса
+// Опишите в комментарии (2-3 предложения): почему для чекбокса используют
+// .checked, а не .value, хотя у текстового поля именно .value? Что вообще
+// хранится в .value у чекбокса, и почему оно бесполезно для проверки
+// "отмечен/не отмечен"?
+
+// Ответ: у чекбокса .value — это всего лишь строка, переданная в атрибуте
+// value (по умолчанию "on"), и она одинаковая и отмеченного, и невыбранного
+// чекбокса. Свойство .checked хранит именно состояние — true/false, в зависимости
+// от того, стоит ли галочка, поэтому проверять нужно его.
+
+При пустом имени или неотмеченном согласии форма не отправляется и выводит понятную ошибку, при корректных данных сообщение об ошибке очищается, а значения полей отображаются в консоли. Результат работы представлен на рисунке 7.
+
+Рисунок 7 – Валидация формы и вывод значений полей
+
+Задание 8. Таймеры (setTimeout, setInterval)
+
+В задании №8 отработаны таймеры. По клику на кнопку уведомление #toast показывается снятием класса hidden, а через setTimeout с задержкой 3000 мс скрывается обратно. Текущее время записывается в #clock каждую секунду через setInterval. Кнопка «Старт» запускает интервал обратного отсчёта, уменьшающий число в #countdown на единицу, при достижении нуля интервал останавливается через clearInterval. Идентификатор интервала сохранён в переменной объявленной вне обработчиков, поэтому кнопки «Стоп» и «Сброс» останавливают его, а «Сброс» дополнительно возвращает значение 10. Ответ о необходимости сохранять id таймера приведён в комментарии.
+
+Листинг 8 – Работа с таймерами
+
+task8.html
+
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №8: таймеры (setTimeout, setInterval)
+  Вариант 03
+
+  Все TODO — в var03.js. Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+  <style>
+    .hidden { display: none; }
+    #toast { background: #333; color: #fff; padding: 10px 16px; border-radius: 6px; margin-top: 10px; }
+    #countdown, #clock { font-size: 24px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h1>Зоомагазин «Лапки»</h1>
+
+  <button id="toast-btn">Показать уведомление</button>
+  <div id="toast" class="hidden">«В наличии» — сообщение исчезнет через 3 секунды</div>
+
+  <hr>
+
+  <div id="clock"></div>
+
+  <hr>
+
+  <div id="countdown">10</div>
+  <button id="start-btn">Старт</button>
+  <button id="stop-btn">Стоп</button>
+  <button id="reset-btn">Сброс</button>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="task8_2.js"></script>
+</body>
+</html>
+
+task8_2.js
+
+// ЛАБОРАТОРНАЯ РАБОТА №3
+// ЗАДАНИЕ №8: таймеры (setTimeout, setInterval) — Вариант 03
+// Тема: Зоомагазин «Лапки». Откройте var03.html через Live Server.
+
+// --- Лёгкий уровень ---
+
+// TODO 1: setTimeout — уведомление само исчезает
+// Получите #toast-btn и #toast. По клику на кнопку уберите у #toast класс
+// "hidden" (появится), а через setTimeout — верните класс "hidden" обратно
+// через 3000мс (3 секунды)
+
+// Подсказка: setTimeout(function() { ... }, 3000) — функция внутри
+// выполнится ОДИН РАЗ, через 3 секунды после вызова setTimeout, а не сразу.
+// Показать/скрыть — это classList.remove("hidden") / classList.add("hidden"),
+// а не .remove() самого элемента (это удалило бы его из DOM насовсем).
+
+var toastBtn = document.querySelector("#toast-btn");
+var toast = document.querySelector("#toast");
+
+toastBtn.addEventListener("click", function () {
+  toast.classList.remove("hidden");
+
+  setTimeout(function () {
+    toast.classList.add("hidden");
+  }, 3000);
+});
+
+
+
+// TODO 2: setInterval — живые часы
+// Получите #clock. Через setInterval КАЖДУЮ секунду (1000мс) записывайте в
+// него текущее время: new Date().toLocaleTimeString()
+
+// Подсказка: new Date() создаёт объект с текущей датой/временем прямо в
+// момент вызова — вызывать его нужно ВНУТРИ функции таймера (не один раз
+// снаружи), чтобы время реально обновлялось на каждом тике.
+
+var clock = document.querySelector("#clock");
+
+setInterval(function () {
+  clock.textContent = new Date().toLocaleTimeString();
+}, 1000);
+
+
+
+// --- Средний уровень ---
+
+// TODO 3: setInterval — обратный отсчёт
+// Получите #countdown и #start-btn. По клику на "Старт" запустите
+// setInterval (1000мс), который каждый раз уменьшает число в #countdown на 1
+// (Number(countdownEl.textContent) - 1, записать обратно через textContent)
+
+// Подсказка: id таймера нужно сохранить в переменную ДО того, как он вам
+// понадобится (см. TODO 5) — объявите её ВНЕ функций-обработчиков.
+
+
+
+// TODO 4: остановка при достижении нуля
+// В ТОМ ЖЕ интервале из TODO 3 — после уменьшения проверьте: если число
+// стало 0 (или меньше), остановите сам интервал через clearInterval
+// (используя id, который вернул setInterval при запуске)
+
+// Подсказка: clearInterval(id) вызывается с тем же id, что вернул setInterval —
+// без сохранённого id остановить интервал нечем.
+
+var countdownEl = document.querySelector("#countdown");
+var startBtn = document.querySelector("#start-btn");
+var stopBtn = document.querySelector("#stop-btn");
+var resetBtn = document.querySelector("#reset-btn");
+var countdownTimerId = null;
+
+startBtn.addEventListener("click", function () {
+  if (countdownTimerId !== null) {
+    clearInterval(countdownTimerId);
+  }
+
+  countdownTimerId = setInterval(function () {
+    var nextValue = Number(countdownEl.textContent) - 1;
+    countdownEl.textContent = nextValue;
+
+    if (nextValue <= 0) {
+      clearInterval(countdownTimerId);
+      countdownTimerId = null;
+    }
+  }, 1000);
+});
+
+
+
+// --- Сложный уровень ---
+
+// TODO 5: кнопка "Стоп"
+// Получите #stop-btn. По клику остановите текущий интервал через
+// clearInterval, используя тот же id, что и в TODO 3/4 (переменная должна
+// быть объявлена ВНЕ функций-обработчиков, чтобы быть доступной во всех них)
+
+stopBtn.addEventListener("click", function () {
+  clearInterval(countdownTimerId);
+  countdownTimerId = null;
+});
+
+
+
+// TODO 6: кнопка "Сброс"
+// Получите #reset-btn. По клику остановите интервал (как в TODO 5) И
+// верните #countdown.textContent обратно в "10"
+
+// Подсказка: на всякий случай перед КАЖДЫМ новым запуском setInterval (в
+// TODO 3) стоит сначала останавливать предыдущий, если он ещё жив —
+// иначе при повторном нажатии "Старт" получится два интервала одновременно,
+// и счётчик будет "скакать" быстрее.
+
+resetBtn.addEventListener("click", function () {
+  clearInterval(countdownTimerId);
+  countdownTimerId = null;
+  countdownEl.textContent = "10";
+});
+
+
+
+// --- Задача уровня собеседования ---
+
+// TODO 7: зачем сохранять id таймера
+// Опишите в комментарии (2-3 предложения): зачем обязательно сохранять то,
+// что вернул setInterval/setTimeout, в переменную? Что произойдёт, если
+// несколько раз запустить setInterval для одного и того же счётчика, не
+// останавливая предыдущие через clearInterval?
+
+// Ответ: id таймера — это единственный способ потом его остановить, поэтому его
+// и сохраняют в переменную. Если несколько раз запустить setInterval для одного
+// счётчика, не останавливая предыдущие, на странице окажется несколько
+// параллельных интервалов, и каждый из них будет уменьшать число — счётчик
+// начнёт "скакать" в несколько раз быстрее.
+
+Уведомление исчезает через три секунды, часы обновляются каждую секунду, а обратный отсчёт стартует, останавливается по кнопке «Стоп» и обнуляется при достижении нуля или по кнопке «Сброс». Результат работы представлен на рисунке 8.
+
+Рисунок 8 – Работа setTimeout и setInterval
+
+Задание 9. Fetch API
+
+В задании №9 данные загружаются с учебного API https://jsonplaceholder.typicode.com. По кнопке «Загрузить всех пользователей» выполняется fetch с двумя then и catch: данные выводятся в консоль, а их количество записывается в #users-result. Для загрузки одного пользователя написана асинхронная функция loadSingleUser() с await и try/catch, имя пользователя выводится в #single-result, к кнопке она подключена отдельным обработчиком click. Функция loadBadUser() запрашивает несуществующий id, после получения ответа проверяет response.ok и при ошибке делает throw new Error("Пользователь не найден: " + status), текст ошибки записывается в #error-result. Ответ о том, почему одного catch недостаточно, приведён в комментарии.
+
+Листинг 9 – Загрузка данных через Fetch API
+
+task9.html
+
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №9: Fetch API
+  Вариант 03
+
+  Все TODO — в var03.js. Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+  <style>
+    #error-result { color: red; }
+  </style>
+</head>
+<body>
+
+  <h1>Зоомагазин «Лапки» — данные с сервера</h1>
+
+  <button id="load-users-btn">Загрузить всех пользователей</button>
+  <div id="users-result"></div>
+
+  <hr>
+
+  <button id="load-single-btn">Загрузить одного пользователя</button>
+  <div id="single-result"></div>
+
+  <hr>
+
+  <button id="load-bad-btn">Загрузить несуществующего (проверка ошибки)</button>
+  <div id="error-result"></div>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="task9_2.js"></script>
+</body>
+</html>
+
+task9_2.js
+
+// ЛАБОРАТОРНАЯ РАБОТА №3
+// ЗАДАНИЕ №9: Fetch API — Вариант 03
+// Тема: Зоомагазин «Лапки». Откройте var03.html через Live Server.
+// Используем бесплатный тестовый API: https://jsonplaceholder.typicode.com
+// (специально сделан для учебных запросов, не требует ключей/регистрации)
+
+// --- Лёгкий уровень ---
+
+// TODO 1: fetch + .then + .catch — список пользователей
+// Получите #load-users-btn. По клику сделайте:
+// fetch("https://jsonplaceholder.typicode.com/users")
+//   .then(response => response.json())
+//   .then(data => console.log(data))
+//   .catch(error => console.log("Ошибка:", error));
+
+// Подсказка: response.json() тоже возвращает Promise — поэтому и нужны ДВА
+// .then() подряд: первый разбирает "конверт" (response), второй получает
+// уже готовые данные.
+
+document.querySelector("#load-users-btn").addEventListener("click", function () {
+  fetch("https://jsonplaceholder.typicode.com/users")
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);
+      document.querySelector("#users-result").textContent =
+        "Пользователей: " + data.length;
+    })
+    .catch(error => console.log("Ошибка:", error));
+});
+
+
+
+// TODO 2: покажите количество на странице
+// В том же .then(data => ...) из TODO 1 запишите в #users-result
+// текст вида "Пользователей: " + data.length (через textContent)
+// (запись в #users-result добавлена в тот же .then(data => ...) выше — в TODO 1)
+
+
+
+// --- Средний уровень ---
+
+// TODO 3: async/await — один пользователь
+// Напишите async-функцию loadSingleUser(), которая:
+// 1) await fetch("https://jsonplaceholder.typicode.com/users/1")
+// 2) await response.json()
+// 3) записывает data.name в #single-result через textContent
+// Всё оберните в try/catch (catch пока просто console.log(error))
+
+// Подсказка: слово async ставится перед function, await — перед fetch(...)
+// и перед response.json(). Без async перед функцией await использовать нельзя.
+
+async function loadSingleUser() {
+  try {
+    var response = await fetch("https://jsonplaceholder.typicode.com/users/1");
+    var data = await response.json();
+    document.querySelector("#single-result").textContent = data.name;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+
+
+// TODO 4: подключите функцию к кнопке
+// Получите #load-single-btn и повесьте на неё "click", который вызывает
+// loadSingleUser() из TODO 3
+
+document.querySelector("#load-single-btn").addEventListener("click", function () {
+  loadSingleUser();
+});
+
+
+
+// --- Сложный уровень ---
+
+// TODO 5: обработка HTTP-ошибки (404)
+// Напишите async-функцию loadBadUser(), которая делает
+// await fetch("https://jsonplaceholder.typicode.com/users/9999") (несуществующий id).
+// После получения response проверьте: if (!response.ok) — сделайте
+// throw new Error("Пользователь не найден: " + response.status)
+// В catch — запишите текст ошибки (error.message) в #error-result
+
+// Подсказка: fetch НЕ переходит в catch сам по себе на 404 — сервер всё
+// равно "ответил", просто с кодом ошибки. response.ok — это то единственное,
+// что скажет вам, был ли ответ реально успешным (200-299) или нет.
+
+async function loadBadUser() {
+  try {
+    var response = await fetch(
+      "https://jsonplaceholder.typicode.com/users/9999"
+    );
+
+    if (!response.ok) {
+      throw new Error("Пользователь не найден: " + response.status);
+    }
+  } catch (error) {
+    document.querySelector("#error-result").textContent = error.message;
+  }
+}
+
+
+
+// TODO 6: подключите к кнопке
+// Получите #load-bad-btn и повесьте на неё "click", который вызывает
+// loadBadUser() из TODO 5
+
+document.querySelector("#load-bad-btn").addEventListener("click", function () {
+  loadBadUser();
+});
+
+
+
+// --- Задача уровня собеседования ---
+
+// TODO 7: почему .catch() одного не хватает
+// Опишите в комментарии (2-3 предложения): почему просто fetch(...).catch(...)
+// не поймает ситуацию "пользователь не найден" (404)? Что вообще считается
+// "ошибкой" с точки зрения fetch, а что — просто обычным (хоть и неудачным)
+// ответом сервера?
+
+// Ответ: для fetch "ошибкой" считается только сбой сети (нет интернета, DNS,
+// обрыв соединения) — тогда промис отклоняется и срабатывает .catch(). Ответ
+// 404 — это полноценный ответ сервера: fetch считает его успешным, потому что
+// соединение состоялось, и остаётся самому проверять response.ok.
+
+Кнопки выводят на страницу количество пользователей, имя одного пользователя и сообщение об ошибке «Пользователь не найден: 404», а сетевые сбои перехватываются catch. Результат работы представлен на рисунке 9.
+
+Рисунок 9 – Загрузка данных и обработка ошибки Fetch
+
+Задание 10. JSON (JSON.stringify / JSON.parse)
+
+В задании №10 разобраны сериализация и разбор JSON. Объект person выводится в консоль как есть и в виде строки JSON.stringify, строка raw разбирается через JSON.parse, из полученного объекта читается свойство name. По кнопке сохранения объект из полей формы превращается в строку через JSON.stringify и записывается в localStorage под ключом profile, по кнопке загрузки строка читается через getItem, разбирается через JSON.parse с предварительной проверкой на null и выводится в #output. Продемонстрирована ошибка сохранения объекта без stringify: значение читается обратно строкой "[object Object]", а попытка JSON.parse обёрнута в try/catch и выводит сообщение «Не удалось разобрать JSON: испорченные данные». Ответ о необходимости JSON для localStorage приведён в комментарии.
+
+Листинг 10 – Сериализация JSON и работа с localStorage
+
+task10.html
+
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №3
+  ЗАДАНИЕ №10: JSON (JSON.stringify / JSON.parse)
+  Вариант 03
+
+  Все TODO — в var03.js. Тема варианта: Зоомагазин «Лапки».
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+  <title>Зоомагазин «Лапки»</title>
+</head>
+<body>
+
+  <h1>Зоомагазин «Лапки»</h1>
+
+  <div>
+    <input id="name-field" placeholder="Имя">
+    <input id="age-field" type="number" placeholder="Возраст">
+    <button id="save-btn">Сохранить в localStorage</button>
+    <button id="load-btn">Загрузить из localStorage</button>
+  </div>
+  <div id="output"></div>
+
+  <hr>
+
+  <button id="bad-save-btn">Сохранить БЕЗ stringify (демо ошибки)</button>
+  <button id="bad-load-btn">Прочитать это же значение</button>
+  <div id="bad-output"></div>
+
+  <!-- Подключаем свой JS-файл именно ПОСЛЕ разметки (внизу body) -->
+  <!-- Важная строка! Если подключить <script> выше разметки, элементы ещё не -->
+  <!-- будут существовать в момент выполнения скрипта, и querySelector найдёт null -->
+  <script src="task10_2.js"></script>
+</body>
+</html>
+
+task10_2.js
+
+// ЛАБОРАТОРНАЯ РАБОТА №3
+// ЗАДАНИЕ №10: JSON (JSON.stringify / JSON.parse) — Вариант 03
+// Тема: Зоомагазин «Лапки». Откройте var03.html через Live Server.
+
+// --- Лёгкий уровень ---
+
+// TODO 1: JSON.stringify — объект в строку
+// Создайте обычный объект const person = { name: "Аня", age: 20 };
+// Выведите в консоль сам объект (console.log(person)), а затем
+// console.log(JSON.stringify(person)) — сравните, как они выглядят в консоли
+
+// Подсказка: у JSON-строки ключи в кавычках ("name", а не name), и вся
+// структура — это ОДНА строка текста, а не объект.
+
+const person = { name: "Аня", age: 20 };
+console.log(person);
+console.log(JSON.stringify(person));
+
+
+
+// TODO 2: JSON.parse — строка в объект
+// Создайте строку const raw = '{"name":"Аня","age":20}';
+// Через JSON.parse(raw) получите из неё реальный объект, выведите его в
+// консоль и отдельно выведите parsed.name (докажите, что это теперь
+// настоящий объект)
+
+const raw = '{"name":"Аня","age":20}';
+const parsed = JSON.parse(raw);
+console.log(parsed);
+console.log(parsed.name);
+
+
+
+// --- Средний уровень ---
+
+// TODO 3: сохранение в localStorage
+// Получите #name-field, #age-field, #save-btn. По клику на кнопку:
+// соберите объект { name: nameField.value, age: ageField.value },
+// превратите его в строку через JSON.stringify и сохраните через
+// localStorage.setItem("profile", ...)
+
+// Подсказка: localStorage.setItem("ключ", "значение") — оба аргумента строки.
+// Объект без JSON.stringify не сохранится корректно (см. TODO 5 — там как
+// раз демонстрация этой ошибки).
+
+const nameField = document.querySelector("#name-field");
+const ageField = document.querySelector("#age-field");
+
+document.querySelector("#save-btn").addEventListener("click", function () {
+  const profile = { name: nameField.value, age: ageField.value };
+  localStorage.setItem("profile", JSON.stringify(profile));
+});
+
+
+
+// TODO 4: загрузка из localStorage
+// Получите #load-btn. По клику: localStorage.getItem("profile") достаёт
+// строку, JSON.parse превращает её обратно в объект, запишите в #output
+// что-то вроде "Имя: " + parsed.name + ", возраст: " + parsed.age
+
+// Подсказка: если ничего не сохраняли — getItem вернёт null. Проверьте
+// результат через if перед использованием (parsed.name), иначе можно
+// получить ошибку при обращении к свойству null.
+
+document.querySelector("#load-btn").addEventListener("click", function () {
+  const storedProfile = localStorage.getItem("profile");
+
+  if (storedProfile === null) {
+    return;
+  }
+
+  const savedProfile = JSON.parse(storedProfile);
+  document.querySelector("#output").textContent =
+    "Имя: " + savedProfile.name + ", возраст: " + savedProfile.age;
+});
+
+
+
+// --- Сложный уровень ---
+
+// TODO 5: демонстрация ошибки — сохранение БЕЗ stringify
+// Получите #bad-save-btn. По клику сохраните объект НАПРЯМУЮ, без
+// JSON.stringify: localStorage.setItem("bad", { foo: "bar" })
+// (да, специально неправильно — это часть задания, чтобы увидеть результат)
+
+document.querySelector("#bad-save-btn").addEventListener("click", function () {
+  localStorage.setItem("bad", { foo: "bar" });
+});
+
+
+
+// TODO 6: попытка прочитать это же значение
+// Получите #bad-load-btn. По клику получите localStorage.getItem("bad") и
+// выведите в консоль — увидите строку "[object Object]", а не рабочие
+// данные. Оберните JSON.parse этой строки в try/catch — в catch выведите в
+// #bad-output текст "Не удалось разобрать JSON: испорченные данные"
+
+// Подсказка: JSON.parse("[object Object]") выбросит SyntaxError, т.к. это
+// не валидный JSON — вот почему try/catch тут обязателен, если данные могут
+// быть повреждены.
+
+document.querySelector("#bad-load-btn").addEventListener("click", function () {
+  const badRaw = localStorage.getItem("bad");
+  console.log(badRaw);
+
+  try {
+    JSON.parse(badRaw);
+  } catch (error) {
+    document.querySelector("#bad-output").textContent =
+      "Не удалось разобрать JSON: испорченные данные";
+  }
+});
+
+
+
+// --- Задача уровня собеседования ---
+
+// TODO 7: почему localStorage нужен именно JSON
+// Опишите в комментарии (2-3 предложения): почему localStorage вообще
+// требует JSON.stringify/JSON.parse — что будет, если положить туда объект
+// напрямую, и почему localStorage в принципе не может хранить "живые"
+// JS-объекты?
+
+// Ответ: localStorage — это хранилище строк, любой value там неявно приводится
+// к строке, поэтому объект превращается в "[object Object]" и теряет все
+// данные. JSON.stringify делает из объекта текст с сохранением структуры, а
+// JSON.parse восстанавливает из него настоящий объект. "Живые" объекты с
+// методами и ссылками хранить нельзя — в хранилище попадает только текст.
+
+Данные формы сохраняются и восстанавливаются из localStorage, а испорченное значение не приводит к ошибке страницы благодаря конструкции try/catch. Результат работы представлен на рисунке 10.
+
+Рисунок 10 – Сохранение и чтение данных в localStorage
+
+Итоговое задание. Сайт ТЦ «Галерея»
+
+В итоговом задании к сайту ТЦ «Галерея», свёрстанному в лабораторной работе №2, подключён скрипт итогового задания и реализованы все пункты требований. Навигация и карточки услуг обработаны делегированием: один обработчик на элементе nav #site-nav переносит класс active между ссылками, один обработчик на секции .features переключает у карточки класс selected и добавляет её в избранное. Список избранного создаётся динамически: элемент <li> с названием карточки и кнопка удаления создаются через createElement, кнопка получает прямой обработчик, удаляющий этот пункт, а заглушка «Пока пусто» скрывается классом hidden, пока список пуст. Промо-таймер отсчитывает пять минут в формате MM:SS и по достижении нуля останавливается через clearInterval, после чего текст бейджа меняется на «Акция завершена». Форма подписана на событие submit с event.preventDefault(): проверяются заполненность всех четырёх текстовых полей и выбор варианта в обеих группах радио-кнопок, результат выводится в элемент #form-status. При успешной отправке значения полей сохраняются в localStorage одним объектом через JSON.stringify и подставляются обратно в поля при загрузке страницы. Отзыв загружается кнопкой через async/await и fetch с проверкой response.ok, текст комментария и его автор выводятся в #review-content. В качестве улучшений добавлены живые часы в подвале страницы и анимация появления новой записи в избранном. Разметка дополнена секциями избранного и отзыва, промо-таймером, полем статуса формы, часами и подключением скрипта, стили для новых элементов добавлены в таблицу стилей сайта.
+
+Листинг 11 – Итоговое задание: сайт ТЦ «Галерея»
+
+finalTask.html
+
+<!--
+  ЛАБОРАТОРНАЯ РАБОТА №2
+  ИТОГОВОЕ ЗАДАНИЕ
+  Вариант 03
+
+  Стиль варианта: «ТЦ» — ТЦ «Галерея».
+
+  ЗАДАНИЕ: спроектируйте и свёрстайте с нуля полноценный одностраничный
+  сайт в стиле «ТЦ», используя весь материал лабораторной
+  работы №2 — семантическую вёрстку, Flexbox, Grid, box model, position,
+  модульную шкалу размеров, псевдоклассы/псевдоэлементы и адаптивность
+  (media query).
+
+  ТРЕБОВАНИЯ:
+  - Дизайн и цветовая палитра должны соответствовать теме варианта —
+    подберите их самостоятельно.
+  - На странице обязательно должна быть форма, которая содержит:
+    4 текстовых поля разных типов (текст, email, пароль, телефон) и
+    две группы radio-кнопок — выбор из трёх вариантов и выбор из двух.
+  - Остальная структура сайта, секции и оформление — на ваше усмотрение.
+    Ниже — стандартный каркас страницы, который используется во всех
+    вариантах; наполняйте и стилизуйте его по своему вкусу.
+
+  Подробные подсказки по каждой теме и критерии оценки — в методичке
+  к лабораторной работе №2.
+-->
+
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Важная строка! Добавляем всегда в своём проекте -->
+    <title>ТЦ «Галерея» — вариант 03</title>
+    <link rel="stylesheet" href="finalTask.css">
+  </head>
+  <body>
+
+    <header>
+      <h1>ТЦ «Галерея»</h1>
+      <nav class="nav" id="site-nav">
+        <a href="#">Главная</a>
+        <a href="#">О нас</a>
+        <a href="#">Услуги</a>
+        <a href="#">Контакты</a>
+      </nav>
+    </header>
+
+    <main>
+
+      <section class="hero">
+        <p>Сотни магазинов и развлечений под одной крышей.</p>
+      </section>
+
+      <section class="features">
+        <div class="feature-card">
+          <h3>Качество</h3>
+          <p>Мы тщательно следим за каждой деталью.</p>
+          <button type="button" class="add-fav-btn">В избранное</button>
+        </div>
+        <div class="feature-card">
+          <h3>Скорость</h3>
+          <p>Быстро решаем любые вопросы клиентов.</p>
+          <button type="button" class="add-fav-btn">В избранное</button>
+        </div>
+        <div class="feature-card">
+          <h3>Забота о клиенте</h3>
+          <p>Индивидуальный подход к каждому.</p>
+          <button type="button" class="add-fav-btn">В избранное</button>
+        </div>
+      </section>
+
+      <section class="favorites">
+        <h2>Избранное</h2>
+        <ul id="favorites-list"></ul>
+        <p id="favorites-empty">Пока пусто</p>
+      </section>
+
+      <section class="food-court">
+        <div class="food-court-copy">
+          <h2>Фуд-корт</h2>
+          <p>
+            На третьем этаже ТЦ «Галерея» работает уютный фуд-корт более чем
+            на 400 посадочных мест. Здесь представлены кухни мира: итальянская,
+            японская, кавказская и домашние десерты, а также кофейни с
+            собственным зерном.
+          </p>
+          <ul class="food-court-list">
+            <li>Более 20 кафе и ресторанов</li>
+            <li>Детская зона с аниматорами</li>
+            <li>Wi-Fi и зарядные станции</li>
+            <li>Ежедневно с 10:00 до 22:00</li>
+          </ul>
+        </div>
+        <figure class="food-court-figure">
+          <img src="image.jpg" alt="Фуд-корт ТЦ «Галерея»">
+          <figcaption>Панорама фуд-корта ТЦ «Галерея»</figcaption>
+        </figure>
+      </section>
+
+      <section class="promo">
+        <div class="promo-card">
+          <span class="badge">Скидка 10%</span>
+          <span id="promo-timer">05:00</span>
+          <h2>Специальное предложение</h2>
+          <p>Оставьте заявку прямо сейчас — расскажем обо всех деталях.</p>
+        </div>
+      </section>
+
+      <section class="review">
+        <h2>Отзыв клиента</h2>
+        <div id="review-content">Нажмите кнопку, чтобы загрузить отзыв</div>
+        <button type="button" id="load-review-btn" class="btn">Показать отзыв</button>
+      </section>
+
+      <section class="form-section">
+        <h2>Оставить заявку</h2>
+        <form action="/submit" method="POST" novalidate>
+
+          <div class="form-field">
+            <label class="required" for="fname">Имя</label>
+            <input type="text" id="fname" name="name" placeholder="Ваше имя" required>
+          </div>
+
+          <div class="form-field">
+            <label class="required" for="femail">Email</label>
+            <input type="email" id="femail" name="email" placeholder="you@example.com" required>
+          </div>
+
+          <div class="form-field">
+            <label class="required" for="fpass">Пароль</label>
+            <input type="password" id="fpass" name="password" placeholder="Придумайте пароль" required>
+          </div>
+
+          <div class="form-field">
+            <label class="required" for="fphone">Телефон</label>
+            <input type="tel" id="fphone" name="phone" placeholder="+7 (900) 000-00-00" required>
+          </div>
+
+          <fieldset class="radio-group">
+            <legend>Удобное время визита</legend>
+            <label for="time_morning">
+              <input type="radio" id="time_morning" name="visit_time" value="morning"> Утро
+            </label>
+            <label for="time_day">
+              <input type="radio" id="time_day" name="visit_time" value="day"> День
+            </label>
+            <label for="time_evening">
+              <input type="radio" id="time_evening" name="visit_time" value="evening"> Вечер
+            </label>
+          </fieldset>
+
+          <fieldset class="radio-group">
+            <legend>Получать новости о скидках?</legend>
+            <label for="news_yes">
+              <input type="radio" id="news_yes" name="news" value="yes"> Да
+            </label>
+            <label for="news_no">
+              <input type="radio" id="news_no" name="news" value="no"> Нет
+            </label>
+          </fieldset>
+
+          <button type="submit" class="btn">Отправить заявку</button>
+
+        </form>
+
+        <div id="form-status"></div>
+      </section>
+
+    </main>
+
+    <footer>
+      <p>Текущее время: <span id="site-clock"></span></p>
+      <p>&copy; 2026 ТЦ «Галерея». Учебный проект — лабораторная работа №2.</p>
+    </footer>
+
+    <!-- Подключаем JS-файл итогового задания лабораторной работы №3
+         ПОСЛЕ разметки (внизу body) -->
+    <script src="итог-лаба3.js"></script>
+
+  </body>
+</html>
+
+finalTask.css
+
+/*
+  ЛАБОРАТОРНАЯ РАБОТА №2
+  ИТОГОВОЕ ЗАДАНИЕ
+  Вариант 03
+  Стиль: «ТЦ» — ТЦ «Галерея»
+
+  Полное описание задания и требований — в var03.html.
+*/
+
+/* Обязательный элемент в любом проекте — глобальный box-sizing,
+   чтобы padding и border не увеличивали заданную ширину элементов. */
+* {
+  box-sizing: border-box;
+}
+
+/* Дальше — вся стилизация ваша: цвета, отступы, Flexbox, Grid,
+   position, псевдоклассы/псевдоэлементы, адаптивность. */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  background: #f5f3ee;
+}
+
+h2 {
+  font-size: 31px;
+  color: #1d2b3c;
+}
+
+h3 {
+  font-size: 25px;
+  color: #1d2b3c;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 32px;
+  background: #1d2b3c;
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: 1px;
+}
+
+.nav {
+  display: flex;
+  gap: 24px;
+}
+
+.nav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.nav a:hover {
+  color: #e6b85c;
+}
+
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 20px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.hero {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  padding: 40px 24px;
+  background: linear-gradient(135deg, #27364a, #3f5270);
+  color: #fff;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.feature-card {
+  background: #fff;
+  border: 1px solid #e3ddd1;
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.feature-card h3 {
+  margin-top: 0;
+}
+
+.promo-card p {
+  margin-bottom: 0;
+}
+
+.food-court {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 32px;
+  background: #fff;
+  border: 1px solid #e3ddd1;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.food-court-copy {
+  flex: 1;
+}
+
+.food-court-copy h2 {
+  margin-top: 0;
+}
+
+.food-court-list {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.food-court-list li {
+  margin-bottom: 6px;
+}
+
+.food-court-figure {
+  flex: 1;
+  margin: 0;
+}
+
+.food-court-figure img {
+  width: 100%;
+  display: block;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.food-court-figure figcaption {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.promo-card {
+  position: relative;
+  padding: 40px;
+  background: #1d2b3c;
+  color: #fff;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.badge {
+  position: absolute;
+  top: -16px;
+  right: 24px;
+  background: #e6b85c;
+  color: #1d2b3c;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 999px;
+}
+
+.form-section h2 {
+  text-align: center;
+  margin-top: 0;
+}
+
+.form-section form {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid #e3ddd1;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-field label {
+  font-weight: 600;
+  color: #1d2b3c;
+}
+
+.required::after {
+  content: " *";
+  color: firebrick;
+}
+
+.form-field input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.form-field input:focus {
+  border-color: #e6b85c;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(230, 184, 92, 0.3);
+}
+
+.radio-group {
+  margin: 0;
+  border: 1px solid #e3ddd1;
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.radio-group legend {
+  padding: 0 6px;
+  font-weight: 600;
+  color: #1d2b3c;
+}
+
+.btn {
+  background: #1d2b3c;
+  color: #fff;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: #e6b85c;
+  color: #1d2b3c;
+}
+
+footer {
+  margin-top: 48px;
+  padding: 24px 20px;
+  background: #1d2b3c;
+  color: #cfd8e3;
+  text-align: center;
+}
+
+footer p {
+  margin: 0;
+}
+
+/* =========================================================================
+   ЛАБОРАТОРНАЯ РАБОТА №3 — ИТОГОВОЕ ЗАДАНИЕ
+   Стили для элементов, добавленных в рамках задания:
+   навигация (.active), карточки (.selected), избранное, промо-таймер,
+   статус формы, отзыв, часы и анимация появления записи.
+   ========================================================================= */
+
+.nav a.active {
+  color: #e6b85c;
+  border-bottom: 2px solid #e6b85c;
+}
+
+.feature-card {
+  cursor: pointer;
+}
+
+.feature-card.selected {
+  border-color: #e6b85c;
+  box-shadow: 0 0 0 3px rgba(230, 184, 92, 0.35);
+}
+
+.add-fav-btn {
+  margin-top: 12px;
+  padding: 8px 14px;
+  border: 1px solid #1d2b3c;
+  border-radius: 8px;
+  background: #fff;
+  color: #1d2b3c;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.add-fav-btn:hover {
+  background: #1d2b3c;
+  color: #fff;
+}
+
+.favorites h2 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+#favorites-list {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 640px;
+}
+
+#favorites-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid #e3ddd1;
+  border-radius: 8px;
+}
+
+.remove-fav-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  background: firebrick;
+  color: #fff;
+  cursor: pointer;
+}
+
+.remove-fav-btn:hover {
+  background: #8b1212;
+}
+
+#favorites-empty {
+  margin: 0;
+  text-align: center;
+  color: #6b7280;
+}
+
+#favorites-empty.hidden {
+  display: none;
+}
+
+#promo-timer {
+  display: block;
+  margin-top: 12px;
+  font-size: 32px;
+  font-weight: 700;
+  color: #e6b85c;
+}
+
+#form-status {
+  max-width: 640px;
+  min-height: 24px;
+  margin: 16px auto 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+#form-status.error {
+  color: firebrick;
+}
+
+#form-status.success {
+  color: #22543d;
+}
+
+.review h2 {
+  text-align: center;
+}
+
+#review-content {
+  max-width: 640px;
+  margin: 0 auto 16px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid #e3ddd1;
+  border-radius: 10px;
+  font-style: italic;
+}
+
+#load-review-btn {
+  display: block;
+  margin: 0 auto;
+}
+
+#site-clock {
+  color: #e6b85c;
+  font-weight: 600;
+}
+
+@keyframes fav-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#favorites-list li.fav-in {
+  animation: fav-in 0.3s ease;
+}
+
+@media (max-width: 700px) {
+  header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .features {
+    grid-template-columns: 1fr;
+  }
+
+  .food-court {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .form-section form {
+    padding: 20px;
+  }
+}
+
+итог-лаба3.js
+
+// ЛАБОРАТОРНАЯ РАБОТА №3
+// ИТОГОВОЕ ЗАДАНИЕ — Вариант 03
+// Стиль: «ТЦ» — ТЦ «Галерея»
+//
+// Это ПРОДОЛЖЕНИЕ вашего сайта «ТЦ «Галерея»» из Итогового задания Лабы №2.
+// Готовой разметки тут больше нет — возьмите этот файл целиком и подключите
+// в СВОЙ проект (<script src="итог-лаба3.js"></script> в конце body, ПОСЛЕ
+// разметки). Работайте со своей собственной вёрсткой, дополняя её там, где
+// сказано "нужно добавить" в пунктах ниже.
+//
+// НАПОМИНАНИЕ о структуре вашего сайта из Лабы №2 (она была одинаковой у
+// всех — просто с вашим оформлением и вашими полями формы):
+// <nav class="nav"> с несколькими <a> — меню сайта
+// три <div class="feature-card"> — карточки услуг/преимуществ
+// <div class="promo-card"> с <span class="badge"> внутри — промо-блок
+// <section class="form-section"> с <form> — форма (4 текстовых поля + 2 radio-группы)
+//
+// Подсказок по коду здесь нет — это итоговая работа, опирайтесь на то, что
+// делали в Заданиях №1-10.
+//
+// ТРЕБОВАНИЯ:
+//
+// 1. Навигация (делегирование). Один addEventListener("click", ...) на ваш
+//    <nav class="nav"> (добавьте ему id, если хотите обращаться проще).
+//    Клик по любой ссылке <a> внутри — добавляет ей класс "active" и убирает
+//    этот класс у остальных ссылок. Стиль для .active впишите в свой CSS сами.
+//
+// 2. Карточки услуг (делегирование + классы). Один обработчик на общего
+//    родителя ваших .feature-card. Клик по любой .feature-card — переключает
+//    ей класс "selected" (classList.toggle). Стиль для .selected — тоже свой.
+//
+// 3. Избранное (создание и удаление элементов) — нужно добавить в разметку:
+//    - в каждую .feature-card — кнопку, например
+//      <button class="add-fav-btn">В избранное</button>
+//    - где-нибудь на странице — пустой список и заглушку:
+//      <ul id="favorites-list"></ul>
+//      <p id="favorites-empty">Пока пусто</p>
+//    По клику на .add-fav-btn (делегирование на родителя карточек) — через
+//    createElement создайте новый <li> с названием карточки (текст её h3)
+//    внутри #favorites-list, добавьте туда же кнопку удаления, у которой
+//    сразу же (без делегирования — ссылка на неё уже есть) повесьте
+//    обработчик, удаляющий именно этот <li>. Показывайте #favorites-empty,
+//    только когда список пуст — проверяйте это после каждого добавления/
+//    удаления.
+//
+// 4. Промо-таймер (setInterval) — нужно добавить в разметку: внутри вашего
+//    .promo-card добавьте <span id="promo-timer">05:00</span>. Запустите
+//    обратный отсчёт от 5 минут (300 секунд), обновляя текст каждую секунду
+//    в формате MM:SS (например, "04:59"). Когда дойдёт до 0 — остановите
+//    интервал (clearInterval) и измените текст вашего <span class="badge">
+//    на "Акция завершена".
+//
+// 5. Валидация формы (события + формы). При отправке вашей формы —
+//    event.preventDefault(). Проверьте, что все текстовые поля заполнены и
+//    что в ОБЕИХ radio-группах выбран вариант. Если что-то не так — выведите
+//    понятную ошибку рядом с формой (например, в новый
+//    <div id="form-status"></div>, если такого элемента ещё нет) и
+//    остановитесь (return). Если всё заполнено — покажите сообщение об
+//    успешной отправке.
+//
+// 6. Сохранение данных формы (JSON + localStorage). После успешной отправки
+//    сохраните значения текстовых полей формы в localStorage (одним
+//    объектом через JSON.stringify). При обычной загрузке страницы — если в
+//    localStorage уже есть сохранённые данные, подставьте их обратно в поля
+//    формы (JSON.parse), чтобы не вводить всё заново.
+//
+// 7. Отзыв с сервера (Fetch API) — нужно добавить в разметку: где-нибудь на
+//    странице —
+//    <div id="review-content">Нажмите кнопку, чтобы загрузить отзыв</div>
+//    <button id="load-review-btn">Показать отзыв</button>
+//    По клику — через fetch (async/await или .then, на ваш выбор) загрузите
+//    ОДИН комментарий с
+//    https://jsonplaceholder.typicode.com/comments?_limit=1
+//    и выведите его текст (свойство body) и автора (свойство email) в
+//    #review-content. Не забудьте обработку ошибок сети (try/catch или .catch).
+//
+// 8. (Необязательно, для повышенной оценки) Добавьте 1-2 своих улучшения,
+//    используя пройденный материал — например, живые часы где-нибудь на
+//    странице, дополнительную проверку в форме, анимацию через classList
+//    и т.д.
+
+// ============================================================================
+// РЕАЛИЗАЦИЯ
+// ============================================================================
+
+// --- 1. Навигация (делегирование) ---
+
+var siteNav = document.querySelector("#site-nav");
+
+siteNav.addEventListener("click", function (event) {
+  var link = event.target.closest("a");
+
+  if (link === null) {
+    return;
+  }
+
+  var navLinks = siteNav.querySelectorAll("a");
+  navLinks.forEach(function (item) {
+    item.classList.remove("active");
+  });
+
+  link.classList.add("active");
+});
+
+
+
+// --- 2. Карточки услуг (делегирование + классы) ---
+// --- 3. Избранное (создание и удаление элементов) ---
+
+var featuresContainer = document.querySelector(".features");
+var favoritesList = document.querySelector("#favorites-list");
+var favoritesEmpty = document.querySelector("#favorites-empty");
+
+function updateFavoritesEmpty() {
+  if (favoritesList.children.length === 0) {
+    favoritesEmpty.classList.remove("hidden");
+  } else {
+    favoritesEmpty.classList.add("hidden");
+  }
+}
+
+updateFavoritesEmpty();
+
+featuresContainer.addEventListener("click", function (event) {
+  var addFavBtn = event.target.closest(".add-fav-btn");
+
+  if (addFavBtn !== null) {
+    var card = addFavBtn.closest(".feature-card");
+    var cardTitle = card.querySelector("h3").textContent;
+
+    var alreadyAdded = false;
+    Array.prototype.forEach.call(favoritesList.children, function (item) {
+      if (item.dataset.title === cardTitle) {
+        alreadyAdded = true;
+      }
+    });
+
+    if (alreadyAdded) {
+      return;
+    }
+
+    var favoriteItem = document.createElement("li");
+    favoriteItem.textContent = cardTitle;
+    favoriteItem.dataset.title = cardTitle;
+    favoriteItem.classList.add("fav-in");
+
+    var removeFavBtn = document.createElement("button");
+    removeFavBtn.type = "button";
+    removeFavBtn.textContent = "✕";
+    removeFavBtn.classList.add("remove-fav-btn");
+
+    removeFavBtn.addEventListener("click", function () {
+      favoriteItem.remove();
+      updateFavoritesEmpty();
+    });
+
+    favoriteItem.appendChild(removeFavBtn);
+    favoritesList.appendChild(favoriteItem);
+    updateFavoritesEmpty();
+
+    return;
+  }
+
+  var clickedCard = event.target.closest(".feature-card");
+
+  if (clickedCard !== null) {
+    clickedCard.classList.toggle("selected");
+  }
+});
+
+
+
+// --- 4. Промо-таймер (setInterval) ---
+
+var promoTimer = document.querySelector("#promo-timer");
+var promoBadge = document.querySelector(".badge");
+var promoSecondsLeft = 300;
+
+var promoIntervalId = setInterval(function () {
+  promoSecondsLeft = promoSecondsLeft - 1;
+
+  var minutes = Math.floor(promoSecondsLeft / 60);
+  var seconds = promoSecondsLeft % 60;
+
+  promoTimer.textContent =
+    (minutes < 10 ? "0" + minutes : minutes) +
+    ":" +
+    (seconds < 10 ? "0" + seconds : seconds);
+
+  if (promoSecondsLeft <= 0) {
+    clearInterval(promoIntervalId);
+    promoBadge.textContent = "Акция завершена";
+  }
+}, 1000);
+
+
+
+// --- 5. Валидация формы (события + формы) ---
+// --- 6. Сохранение данных формы (JSON + localStorage) ---
+
+var leadForm = document.querySelector(".form-section form");
+var formStatus = document.querySelector("#form-status");
+var fnameField = document.querySelector("#fname");
+var femailField = document.querySelector("#femail");
+var fpassField = document.querySelector("#fpass");
+var fphoneField = document.querySelector("#fphone");
+var formStorageKey = "galerie-lead";
+
+function setFormStatus(message, type) {
+  formStatus.textContent = message;
+  formStatus.classList.remove("error", "success");
+
+  if (type) {
+    formStatus.classList.add(type);
+  }
+}
+
+leadForm.addEventListener("submit", function (event) {
+  event.preventDefault();
+
+  var textFields = [fnameField, femailField, fpassField, fphoneField];
+
+  for (var i = 0; i < textFields.length; i++) {
+    if (textFields[i].value.trim() === "") {
+      setFormStatus("Заполните все текстовые поля формы", "error");
+      return;
+    }
+  }
+
+  var visitTime = document.querySelector('input[name="visit_time"]:checked');
+  var newsChoice = document.querySelector('input[name="news"]:checked');
+
+  if (visitTime === null || newsChoice === null) {
+    setFormStatus("Выберите вариант в обеих группах радиокнопок", "error");
+    return;
+  }
+
+  var formData = {
+    name: fnameField.value,
+    email: femailField.value,
+    password: fpassField.value,
+    phone: fphoneField.value
+  };
+
+  localStorage.setItem(formStorageKey, JSON.stringify(formData));
+  setFormStatus("Заявка успешно отправлена!", "success");
+});
+
+var savedForm = localStorage.getItem(formStorageKey);
+
+if (savedForm !== null) {
+  try {
+    var savedData = JSON.parse(savedForm);
+
+    fnameField.value = savedData.name || "";
+    femailField.value = savedData.email || "";
+    fpassField.value = savedData.password || "";
+    fphoneField.value = savedData.phone || "";
+  } catch (error) {
+    console.log("Не удалось прочитать сохранённые данные формы:", error);
+  }
+}
+
+
+
+// --- 7. Отзыв с сервера (Fetch API) ---
+
+var loadReviewBtn = document.querySelector("#load-review-btn");
+var reviewContent = document.querySelector("#review-content");
+
+loadReviewBtn.addEventListener("click", async function () {
+  reviewContent.textContent = "Загрузка отзыва...";
+
+  try {
+    var response = await fetch(
+      "https://jsonplaceholder.typicode.com/comments?_limit=1"
+    );
+
+    if (!response.ok) {
+      throw new Error("Ошибка сервера: " + response.status);
+    }
+
+    var comments = await response.json();
+    var comment = comments[0];
+
+    reviewContent.textContent = "«" + comment.body + "» — " + comment.email;
+  } catch (error) {
+    reviewContent.textContent = "Не удалось загрузить отзыв: " + error.message;
+  }
+});
+
+
+
+// --- 8. Улучшения (необязательный пункт) ---
+
+// Улучшение 1: живые часы в подвале страницы.
+var siteClock = document.querySelector("#site-clock");
+
+function updateSiteClock() {
+  siteClock.textContent = new Date().toLocaleTimeString();
+}
+
+updateSiteClock();
+setInterval(updateSiteClock, 1000);
+
+// Улучшение 2: анимация появления новой записи в избранном — класс "fav-in"
+// добавляется новому <li> при создании (см. раздел 3 выше), а CSS-правило
+// @keyframes fav-in плавно проявляет элемент на странице.
+
+Сайт работает автономно: навигация и карточки переключают классы, избранное создаётся и удаляется, таймер промо-акции отсчитывает время, форма проверяет данные и сохраняет их в localStorage, а отзыв загружается с сервера и выводится на страницу. Результат работы представлен на рисунке 11.
+
+Рисунок 11 – Сайт ТЦ «Галерея» с функциями лабораторной работы №3

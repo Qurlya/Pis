@@ -11,6 +11,8 @@
 // Подсказка: textContent — это свойство (не метод, без скобок), просто
 // присвойте ему новую строку: element.textContent = "текст";
 
+document.querySelector("#username").textContent = "Зоомагазин «Лапки»";
+
 
 
 // TODO 2: textContent
@@ -18,6 +20,9 @@
 // описание, связанное с темой Зоомагазин «Лапки»
 
 // Подсказка: тот же приём, что и в TODO 1 — просто другой элемент и текст.
+
+document.querySelector("#bio").textContent =
+  "Всё для ухода за питомцами: корма, игрушки и аксессуары.";
 
 
 
@@ -32,6 +37,9 @@
 // но, в отличие от textContent, теги внутри строки реально отрисуются как
 // разметка, а не как обычный видимый текст.
 
+document.querySelector("#notice").innerHTML =
+  "<strong>Внимание!</strong> Информация обновлена.";
+
 
 
 // TODO 4: setAttribute / getAttribute
@@ -42,6 +50,11 @@
 // Подсказка: getAttribute("имя") — читает (со скобками, имя атрибута строкой).
 // setAttribute("имя", "значение") — записывает (два аргумента строками).
 // Оба работают с ЛЮБЫМ атрибутом, не только с src/alt.
+
+var avatar = document.querySelector("#avatar");
+console.log(avatar.getAttribute("alt"));
+avatar.setAttribute("src", "photo2.jpg");
+avatar.setAttribute("alt", "Фото товара из зоомагазина «Лапки»");
 
 
 
@@ -55,6 +68,10 @@
 // Подсказка: classList.remove("класс") и classList.add("класс") — оба
 // принимают имя класса строкой, БЕЗ точки перед именем.
 
+var statusBadge = document.querySelector("#status-badge");
+statusBadge.classList.remove("badge-offline");
+statusBadge.classList.add("badge-online");
+
 
 
 // TODO 6: classList.contains
@@ -63,6 +80,13 @@
 
 // Подсказка: classList.contains("имя-класса") возвращает true/false —
 // удобно использовать прямо внутри if (el.classList.contains("...")) { ... }
+
+var badgeAgain = document.querySelector("#status-badge");
+if (badgeAgain.classList.contains("badge-online")) {
+  console.log(true);
+} else {
+  console.log(false);
+}
 
 
 
@@ -76,5 +100,12 @@
 // Подсказка: подумайте, что произойдёт, если пользователь введёт в
 // комментарий текст с символами < и >, например <script>...</script> — как
 // его обработает innerHTML, а как textContent?
+
+// Ответ: textContent записывает и читает только текст, все символы вроде < и >
+// остаются обычными видимыми знаками, а innerHTML разбирает их как HTML-теги.
+// Если выводить через innerHTML введённый пользователем текст, то тег
+// <script>...</script> попадёт в разметку и выполнится — это XSS-уязвимость.
+// Поэтому для текста от пользователя безопаснее textContent: он ничего не
+// исполняет и всегда показывает строку как есть.
 
 

@@ -11,6 +11,12 @@
 // Подсказка: addEventListener("click", function() {...}) — функция внутри
 // НЕ вызывается сразу, браузер сам вызовет её при каждом клике.
 
+var likeBtn = document.querySelector("#like-btn");
+
+likeBtn.addEventListener("click", function () {
+  likeBtn.textContent = "❤️ Нравится";
+});
+
 
 
 // TODO 2: второй обработчик на ТОТ ЖЕ элемент
@@ -22,6 +28,12 @@
 // Подсказка: addEventListener можно вызвать на одном элементе НЕСКОЛЬКО раз —
 // каждый обработчик сработает независимо, в отличие от btn.onclick, где новый
 // обработчик заменил бы предыдущий.
+
+var counterEl = document.querySelector("#counter");
+
+likeBtn.addEventListener("click", function () {
+  counterEl.textContent = Number(counterEl.textContent) + 1;
+});
 
 
 
@@ -36,6 +48,14 @@
 // event — того самого, что браузер передаёт первым параметром в функцию-
 // обработчик: function(event) { event.preventDefault(); ... }
 
+var demoForm = document.querySelector("#demo-form");
+
+demoForm.addEventListener("submit", function (event) {
+  event.preventDefault();
+  document.querySelector("#form-result").textContent =
+    document.querySelector("#name-input").value;
+});
+
 
 
 // TODO 4: событие "input" — живой предпросмотр
@@ -46,6 +66,12 @@
 // Подсказка: событие "input" вешается на САМО ПОЛЕ (не на форму!) и
 // срабатывает при КАЖДОМ изменении текста — не путайте с "submit" из TODO 3,
 // который висит на форме и срабатывает один раз при отправке.
+
+var nameInput = document.querySelector("#name-input");
+
+nameInput.addEventListener("input", function () {
+  document.querySelector("#live-preview").textContent = nameInput.value;
+});
 
 
 
@@ -61,6 +87,11 @@
 // сработает, а event.target внутри обработчика укажет именно на <li>, по
 // которому кликнули, а не на сам <ul>.
 
+document.querySelector("#color-list").addEventListener("click", function (event) {
+  document.querySelector("#clicked-color").textContent =
+    event.target.getAttribute("data-color");
+});
+
 
 
 // TODO 6: keydown на всём документе
@@ -69,6 +100,10 @@
 
 // Подсказка: document — уже готовый глобальный объект (вся страница целиком),
 // его не нужно "искать" через querySelector, в отличие от обычных элементов.
+
+document.addEventListener("keydown", function (event) {
+  console.log(event.key);
+});
 
 
 
@@ -80,5 +115,10 @@
 // один раз, при загрузке страницы), а
 // btn.addEventListener("click", doSomething) — правильно (сработает при клике)?
 // В чём разница между этими двумя записями?
+
+// Ответ: doSomething() — это ВЫЗОВ функции, её результат (обычно undefined)
+// передаётся в addEventListener как обработчик, а сама функция выполняется
+// один раз прямо в момент загрузки страницы. doSomething без скобок — это
+// ссылка на функцию, браузер сохранит её и будет вызывать при каждом клике.
 
 

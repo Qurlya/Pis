@@ -11,6 +11,8 @@
 // Подсказка: document.getElementById("имя-id") — id передаётся БЕЗ решётки #
 // (в отличие от querySelector, где решётка обязательна).
 
+console.log(document.getElementById("main-title"));
+
 
 
 // TODO 2: querySelector по классу
@@ -19,6 +21,8 @@
 
 // Подсказка: querySelector принимает обычный CSS-селектор строкой — точку
 // перед именем класса указывать НУЖНО (в отличие от getElementById).
+
+console.log(document.querySelector(".card"));
 
 
 
@@ -30,6 +34,8 @@
 
 // Подсказка: querySelectorAll возвращает СПИСОК элементов (даже если он один
 // или пустой). У списка есть свойство .length — без скобок, это не метод.
+
+console.log(document.querySelectorAll(".card").length);
 
 
 
@@ -43,6 +49,10 @@
 // искать нужно через card.querySelector(...), а не document.querySelector(...) —
 // иначе всегда найдёте заголовок ПЕРВОЙ карточки, а не текущей.
 // Структура: document.querySelectorAll(".card").forEach(function(card) { ... });
+
+document.querySelectorAll(".card").forEach(function (card) {
+  console.log(card.querySelector(".card-title").textContent);
+});
 
 
 
@@ -59,6 +69,16 @@
 // ошибка, а специальное "пустое" значение. null считается "ложным" (falsy),
 // поэтому if (el) { ... } просто не выполнится, когда el === null.
 
+var buyBtn = document.querySelector("#buy-btn");
+console.log(buyBtn);
+
+var missingEl = document.querySelector("#not-exist");
+console.log(missingEl);
+
+if (missingEl) {
+  console.log(missingEl.textContent);
+}
+
 
 
 // TODO 6: querySelectorAll по ссылкам меню
@@ -68,6 +88,13 @@
 // Подсказка: тот же паттерн, что и в TODO 4 — сначала querySelectorAll
 // (получаем список), затем forEach (перебираем), внутри — .textContent
 // у текущего элемента цикла.
+
+var menuLinks = document.querySelectorAll(".menu-link");
+console.log(menuLinks.length);
+
+menuLinks.forEach(function (link) {
+  console.log(link.textContent);
+});
 
 
 
@@ -85,5 +112,11 @@
 // вы добавили на страницу ещё один <div class="card">. Попадёт ли он в уже
 // полученный список? А если бы список получался через
 // document.getElementsByClassName("card")?
+
+// Ответ: document.querySelectorAll() возвращает статический NodeList — это
+// «снимок» DOM на момент вызова, поэтому элемент, добавленный позже, в уже
+// полученный список не попадёт. document.getElementsByClassName() возвращает
+// «живую» HTMLCollection — она автоматически обновляется при любом изменении
+// страницы, и новый .card сразу появится в этой коллекции.
 
 
