@@ -17,13 +17,16 @@ function FeatureCard({ title, text, isSelected, onToggle, index = 0 }) {
       onKeyDown={handleKeyDown}
     >
       <span className="feature-card__check" aria-hidden="true">
-        {isSelected ? '✓' : '+'}
+        <span
+          className={
+            isSelected
+              ? 'feature-card__icon feature-card__icon--check'
+              : 'feature-card__icon feature-card__icon--plus'
+          }
+        ></span>
       </span>
       <h3>{title}</h3>
       <p>{text}</p>
-      <span className="feature-card__hint">
-        {isSelected ? 'В избранном — нажмите, чтобы убрать' : 'Добавить в избранное'}
-      </span>
     </div>
   )
 }

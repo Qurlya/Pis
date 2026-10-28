@@ -6,6 +6,45 @@ import ReviewSection from '../components/ReviewSection'
 import ContactForm from '../components/ContactForm'
 import Reveal from '../components/Reveal'
 
+const services = [
+  {
+    id: 'shops',
+    icon: '🛍️',
+    title: 'Магазины',
+    text: 'Одежда, обувь, электроника и товары для дома — более 150 брендов.',
+  },
+  {
+    id: 'cinema',
+    icon: '🎬',
+    title: 'Кинотеатр',
+    text: 'Четыре зала с современным звуком и премьерами каждую неделю.',
+  },
+  {
+    id: 'food',
+    icon: '🍽️',
+    title: 'Фуд-корт',
+    text: 'Кухни мира, кофейни и десерты на 400 посадочных мест.',
+  },
+  {
+    id: 'beauty',
+    icon: '✂️',
+    title: 'Салоны красоты',
+    text: 'Стрижки, маникюр, косметология и спа-процедуры.',
+  },
+  {
+    id: 'kids',
+    icon: '🧸',
+    title: 'Детская зона',
+    text: 'Игровая площадка с аниматорами, пока родители за покупками.',
+  },
+  {
+    id: 'parking',
+    icon: '🚗',
+    title: 'Парковка и Wi-Fi',
+    text: 'Бесплатная парковка на 300 мест и быстрый интернет.',
+  },
+]
+
 function HomePage({
   features,
   favorites,
@@ -70,17 +109,24 @@ function HomePage({
       </section>
 
       <Reveal>
-        <section className="features" id="services">
-          {features.map((feature, index) => (
-            <FeatureCard
-              key={feature.id}
-              title={feature.title}
-              text={feature.text}
-              isSelected={favorites.some((item) => item.id === feature.id)}
-              onToggle={() => onToggleFavorite(feature)}
-              index={index}
-            />
-          ))}
+        <section className="advantages">
+          <div className="section-head section-head--compact">
+            <span className="section-eyebrow">Наши принципы</span>
+            <h2>Почему выбирают «Галерею»</h2>
+          </div>
+
+          <div className="features">
+            {features.map((feature, index) => (
+              <FeatureCard
+                key={feature.id}
+                title={feature.title}
+                text={feature.text}
+                isSelected={favorites.some((item) => item.id === feature.id)}
+                onToggle={() => onToggleFavorite(feature)}
+                index={index}
+              />
+            ))}
+          </div>
         </section>
       </Reveal>
 
@@ -90,6 +136,28 @@ function HomePage({
           onRemove={onRemoveFavorite}
           onClear={onClearFavorites}
         />
+      </Reveal>
+
+      <Reveal>
+        <section className="services" id="services">
+          <div className="section-head">
+            <span className="section-eyebrow">Что вас ждёт</span>
+            <h2>Услуги ТЦ «Галерея»</h2>
+            <p>Всё для покупок, отдыха и полезных дел — в одном месте.</p>
+          </div>
+
+          <div className="services-grid">
+            {services.map((service) => (
+              <article className="service-card" key={service.id}>
+                <span className="service-card__icon" aria-hidden="true">
+                  {service.icon}
+                </span>
+                <h3>{service.title}</h3>
+                <p>{service.text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
       </Reveal>
 
       <Reveal>

@@ -1070,19 +1070,63 @@ footer p {
     position: absolute;
     top: 18px;
     right: 18px;
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 32px;
     height: 32px;
     border: 1px solid #e3ddd1;
     border-radius: 50%;
     color: #9aa1ab;
-    font-weight: 700;
+    line-height: 1;
     transition:
         background 0.25s ease,
         border-color 0.25s ease,
         color 0.25s ease,
         transform 0.35s ease;
+}
+
+.feature-card:hover .feature-card__check {
+    color: #a97f22;
+    border-color: #e6b85c;
+}
+
+.feature-card__icon {
+    position: relative;
+    display: block;
+    width: 14px;
+    height: 14px;
+    color: currentColor;
+}
+
+.feature-card__icon--plus::before,
+.feature-card__icon--plus::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 1px;
+    background: currentColor;
+    transform: translate(-50%, -50%);
+}
+
+.feature-card__icon--plus::before {
+    width: 14px;
+    height: 2px;
+}
+
+.feature-card__icon--plus::after {
+    width: 2px;
+    height: 14px;
+}
+
+.feature-card__icon--check {
+    width: 7px;
+    height: 13px;
+    margin-top: -3px;
+    border-right: 2px solid currentColor;
+    border-bottom: 2px solid currentColor;
+    transform: rotate(45deg);
 }
 
 .feature-card.selected .feature-card__check {
@@ -1094,22 +1138,6 @@ footer p {
 
 .feature-card.selected {
     background: linear-gradient(180deg, #fffdf7, #fff);
-}
-
-.feature-card__hint {
-    margin-top: auto;
-    padding-top: 16px;
-    color: #9aa1ab;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.6px;
-    text-transform: uppercase;
-    transition: color 0.25s ease;
-}
-
-.feature-card:hover .feature-card__hint,
-.feature-card.selected .feature-card__hint {
-    color: #a97f22;
 }
 
 /* ---------- Избранное ---------- */
@@ -1189,6 +1217,119 @@ footer p {
     color: #8a8f98;
     font-size: 14px;
     text-align: center;
+}
+
+/* ---------- Заголовки секций ---------- */
+
+.section-head {
+    max-width: 640px;
+    margin: 0 auto 28px;
+    text-align: center;
+}
+
+.section-head--compact {
+    margin-bottom: 20px;
+}
+
+.section-head h2 {
+    margin: 0 0 8px;
+}
+
+.section-head p {
+    margin: 0;
+    color: #6b7280;
+}
+
+.section-eyebrow {
+    display: inline-block;
+    margin-bottom: 6px;
+    color: #a97f22;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+}
+
+/* ---------- Услуги ---------- */
+
+.services {
+    scroll-margin-top: 96px;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.service-card {
+    position: relative;
+    overflow: hidden;
+    padding: 26px 24px;
+    border: 1px solid #e3ddd1;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
+}
+
+.service-card::after {
+    content: "";
+    position: absolute;
+    right: -40px;
+    bottom: -40px;
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(230, 184, 92, 0.18), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.service-card:hover {
+    border-color: #e6b85c;
+    box-shadow: 0 16px 30px rgba(29, 43, 60, 0.12);
+    transform: translateY(-6px);
+}
+
+.service-card:hover::after {
+    opacity: 1;
+}
+
+.service-card__icon {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    margin-bottom: 14px;
+    border-radius: 14px;
+    background: rgba(230, 184, 92, 0.16);
+    font-size: 22px;
+    line-height: 1;
+    transition:
+        transform 0.3s ease,
+        background 0.3s ease;
+}
+
+.service-card:hover .service-card__icon {
+    background: rgba(230, 184, 92, 0.3);
+    transform: translateY(-2px) rotate(-6deg) scale(1.06);
+}
+
+.service-card h3 {
+    margin: 0 0 6px;
+    font-size: 20px;
+}
+
+.service-card p {
+    margin: 0;
+    color: #5b6472;
+    font-size: 15px;
+    line-height: 1.55;
 }
 
 /* ---------- Акция ---------- */
@@ -1556,6 +1697,16 @@ footer p {
 @media (max-width: 900px) {
     .stats {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .services-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 560px) {
+    .services-grid {
+        grid-template-columns: 1fr;
     }
 }
 
