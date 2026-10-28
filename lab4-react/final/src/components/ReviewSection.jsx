@@ -36,19 +36,38 @@ function ReviewSection() {
     }
   }
 
+  const contentClassName = isLoading
+    ? 'review-content review-content--loading'
+    : error
+      ? 'review-content review-content--error'
+      : 'review-content'
+
   return (
     <section className="review">
       <h2>Отзыв клиента</h2>
-      <div className="review-content">
-        {isLoading ? 'Загрузка отзыва...' : error ? error : review}
+
+      <div className={contentClassName} aria-live="polite">
+        {isLoading ? (
+          <span className="review-loading">
+            <span className="spinner" aria-hidden="true"></span>
+            Загрузка отзыва...
+          </span>
+        ) : error ? (
+          error
+        ) : (
+          <span key={review} className="review-text">
+            {review}
+          </span>
+        )}
       </div>
+
       <button
         type="button"
         className="btn load-review-btn"
         onClick={handleLoadReview}
         disabled={isLoading}
       >
-        Показать отзыв
+        {isLoading ? 'Загружаем…' : 'Показать отзыв'}
       </button>
     </section>
   )

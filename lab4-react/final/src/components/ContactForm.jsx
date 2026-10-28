@@ -14,6 +14,13 @@ const EMPTY_FORM = {
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const PHONE_PATTERN = /^\+7 \([0-9]{3}\)-[0-9]{3}-[0-9]{2}-[0-9]{2}$/
 
+const FIELD_ERRORS = {
+  name: 'Укажите имя — хотя бы одно слово',
+  email: 'Введите корректный email, например you@example.com',
+  password: 'Придумайте пароль',
+  phone: 'Формат номера: +7 (900)-000-00-00',
+}
+
 function formatPhone(value) {
   const digits = value.replace(/\D/g, '')
 
@@ -75,6 +82,7 @@ function ContactForm() {
   const [formData, setFormData] = useState(getInitialForm)
   const [errors, setErrors] = useState({})
   const [status, setStatus] = useState({ message: '', type: '' })
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -136,15 +144,24 @@ function ContactForm() {
     setFormData(EMPTY_FORM)
     setErrors({})
     setStatus({ message: '', type: '' })
+    setIsPasswordVisible(false)
     localStorage.removeItem(STORAGE_KEY)
   }
 
   const statusClassName =
     status.type === '' ? 'form-status' : `form-status ${status.type}`
 
+  function fieldClassName(name) {
+    return errors[name] ? 'error-input' : ''
+  }
+
   return (
-    <section className="form-section">
+    <section className="form-section" id="contacts">
       <h2>Оставить заявку</h2>
+      <p className="form-lead">
+        Перезвоним в удобное время и расскажем об акции. Это займёт меньше
+        минуты.
+      </p>
 
       <form onSubmit={handleSubmit} onReset={handleReset} noValidate>
         <div className="form-field">
@@ -158,9 +175,16 @@ function ContactForm() {
             placeholder="Ваше имя"
             value={formData.name}
             onChange={handleChange}
-            className={errors.name ? 'error-input' : ''}
+            className={fieldClassName('name')}
+            aria-invalid={Boolean(errors.name)}
+            aria-describedby={errors.name ? 'fname-error' : undefined}
             required
           />
+          {errors.name && (
+            <span className="field-error" id="fname-error">
+              {FIELD_ERRORS.name}
+            </span>
+          )}
         </div>
 
         <div className="form-field">
@@ -174,25 +198,50 @@ function ContactForm() {
             placeholder="you@example.com"
             value={formData.email}
             onChange={handleChange}
-            className={errors.email ? 'error-input' : ''}
+            className={fieldClassName('email')}
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? 'femail-error' : undefined}
             required
           />
+          {errors.email && (
+            <span className="field-error" id="femail-error">
+              {FIELD_ERRORS.email}
+            </span>
+          )}
         </div>
 
         <div className="form-field">
           <label className="required" htmlFor="fpass">
             Пароль
           </label>
-          <input
-            type="password"
-            id="fpass"
-            name="password"
-            placeholder="Придумайте пароль"
-            value={formData.password}
-            onChange={handleChange}
-            className={errors.password ? 'error-input' : ''}
-            required
-          />
+          <div className="input-wrap">
+            <input
+              type={isPasswordVisible ? 'text' : 'password'}
+              id="fpass"
+              name="password"
+              placeholder="Придумайте пароль"
+              value={formData.password}
+              onChange={handleChange}
+              className={fieldClassName('password')}
+              aria-invalid={Boolean(errors.password)}
+              aria-describedby={errors.password ? 'fpass-error' : undefined}
+              required
+            />
+            <button
+              type="button"
+              className="password-toggle"
+              onClick={() => setIsPasswordVisible((current) => !current)}
+              aria-pressed={isPasswordVisible}
+              aria-label={isPasswordVisible ? 'Скрыть пароль' : 'Показать пароль'}
+            >
+              {isPasswordVisible ? 'Скрыть' : 'Показать'}
+            </button>
+          </div>
+          {errors.password && (
+            <span className="field-error" id="fpass-error">
+              {FIELD_ERRORS.password}
+            </span>
+          )}
         </div>
 
         <div className="form-field">
@@ -209,9 +258,16 @@ function ContactForm() {
             maxLength="18"
             value={formData.phone}
             onChange={handleChange}
-            className={errors.phone ? 'error-input' : ''}
+            className={fieldClassName('phone')}
+            aria-invalid={Boolean(errors.phone)}
+            aria-describedby={errors.phone ? 'fphone-error' : undefined}
             required
           />
+          {errors.phone && (
+            <span className="field-error" id="fphone-error">
+              {FIELD_ERRORS.phone}
+            </span>
+          )}
         </div>
 
         <fieldset className="radio-group">
@@ -287,7 +343,14 @@ function ContactForm() {
         </div>
       </form>
 
-      <div className={statusClassName}>{status.message}</div>
+      <div
+        key={`${status.type}-${status.message}`}
+        className={statusClassName}
+        role="status"
+        aria-live="polite"
+      >
+        {status.message}
+      </div>
     </section>
   )
 }
