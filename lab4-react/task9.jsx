@@ -30,6 +30,11 @@
 // покажет реальное количество, даже если AddButton работает и меняет
 // state где-то ещё?
 
+// Ответ: в этом варианте CartCount хранит собственный независимый state,
+// никак не связанный с cartCount в App. AddButton меняет состояние
+// родителя, но CartCount его не получает и продолжает показывать свой
+// собственный счётчик.
+
 
 
 // --- Средний уровень ---
@@ -46,6 +51,11 @@
 // Опишите в комментарии (2-3 предложения): в CartCount данные идут ВНИЗ
 // (значение) или ВВЕРХ? А в AddButton — что именно передаётся вниз, и
 // что физически происходит, когда AddButton вызывает onAdd?
+
+// Ответ: в CartCount значение count идёт вниз, от App к дочернему
+// компоненту. В AddButton вниз передаётся функция onAdd; когда кнопка
+// вызывает её, обновляется state в App, после чего App перерисовывается
+// и передаёт новое значение count в CartCount.
 
 
 
@@ -66,7 +76,47 @@
 // корректно работать через два лежащих в App state (cartCount и
 // isFavorite), ничего не храня внутри себя.
 
+import { useState } from 'react'
 
+function CartCount({ count }) {
+  return <p>В корзине: {count}</p>
+}
+
+function AddButton({ onAdd }) {
+  return <button onClick={onAdd}>Добавить Корм для кошек</button>
+}
+
+function ResetButton({ onReset }) {
+  return <button onClick={onReset}>Очистить корзину</button>
+}
+
+function FavoriteButton({ isFavorite, onToggle }) {
+  return (
+    <div>
+      <p>В избранном: {String(isFavorite)}</p>
+      <button onClick={onToggle}>
+        {isFavorite ? "Убрать из избранного" : "В избранное"}
+      </button>
+    </div>
+  )
+}
+
+function App() {
+  const [cartCount, setCartCount] = useState(0)
+  const [isFavorite, setIsFavorite] = useState(false)
+
+  return (
+    <div>
+      <CartCount count={cartCount} />
+      <AddButton onAdd={() => setCartCount(cartCount + 1)} />
+      <ResetButton onReset={() => setCartCount(0)} />
+      <FavoriteButton
+        isFavorite={isFavorite}
+        onToggle={() => setIsFavorite(!isFavorite)}
+      />
+    </div>
+  )
+}
 
 // --- Задача уровня собеседования ---
 
@@ -77,3 +127,11 @@
 
 // Подсказка: props всегда идут только от родителя к прямому потомку —
 // соседние компоненты друг о друге ничего не знают.
+
+// Ответ: props передаются только от родителя к прямому потомку, а
+// компоненты-соседи не имеют ссылок друг на друга и не знают о
+// существовании друг друга. Поэтому общее состояние хранится в их общем
+// родителе App, который передаёт значение в CartCount и функцию изменения
+// в AddButton.
+
+export default App

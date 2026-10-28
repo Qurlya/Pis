@@ -27,6 +27,10 @@
 // Подсказка: && возвращает значение слева, если оно ложно — а 0 это не
 // false, поэтому React честно печатает "0" на странице.
 
+// Ответ: при cartCount === 0 выражение cartCount && ... возвращает сам 0,
+// и React выводит его на страницу как текст. Нужно явное сравнение:
+// cartCount > 0 && ....
+
 
 
 // --- Средний уровень ---
@@ -67,7 +71,59 @@
 // можно не описывать в App.css, достаточно правильно переключать
 // строку класса).
 
+import { useState } from 'react'
 
+function App() {
+  const [inStock, setInStock] = useState(true)
+  const [cartCount, setCartCount] = useState(0)
+  const [hasDiscount, setHasDiscount] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isFavorite, setIsFavorite] = useState(false)
+
+  if (isLoading) {
+    return (
+      <div>
+        <p>Загрузка каталога «Зоомагазин «Лапки»»...</p>
+        <button onClick={() => setIsLoading(false)}>Показать каталог</button>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <div className={isFavorite ? "card card--favorite" : "card"}>
+        <h2>Корм для кошек</h2>
+        <p>{inStock ? "В наличии" : "Нет в наличии"}</p>
+        {hasDiscount && <p>Скидка!</p>}
+      </div>
+
+      <div>
+        <button onClick={() => setCartCount(cartCount + 1)}>
+          Добавить в корзину
+        </button>
+        <button onClick={() => setInStock(!inStock)}>
+          Переключить наличие
+        </button>
+        <button onClick={() => setHasDiscount(!hasDiscount)}>
+          Переключить скидку
+        </button>
+        <button onClick={() => setIsFavorite(!isFavorite)}>
+          В избранное
+        </button>
+      </div>
+
+      {cartCount > 0 && <p>Товаров в корзине: {cartCount}</p>}
+
+      <p>
+        {cartCount === 0
+          ? "Корзина пуста"
+          : cartCount < 3
+            ? "Товаров мало"
+            : "Полная корзина"}
+      </p>
+    </div>
+  )
+}
 
 // --- Задача уровня собеседования ---
 
@@ -79,3 +135,9 @@
 
 // Подсказка: {} внутри JSX принимает только ВЫРАЖЕНИЯ (то, что
 // возвращает значение), а if — оператор, а не выражение.
+
+// Ответ: {} в JSX принимает только выражения, а if — это оператор, который
+// не возвращает значение. Вместо него используются тернарный оператор,
+// оператор && и ранний return из компонента.
+
+export default App

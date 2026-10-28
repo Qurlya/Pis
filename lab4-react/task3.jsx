@@ -31,6 +31,10 @@
 // говорит React, что нужно перерисовать компонент — для этого существует
 // только вызов setCartCount(...).
 
+// Ответ: присваивание cartCount = cartCount + 1 меняет только локальную
+// переменную текущего рендера и не сообщает React об изменении, поэтому
+// перерисовка не запускается. Нужно вызывать setCartCount(cartCount + 1).
+
 
 
 // --- Средний уровень ---
@@ -72,7 +76,40 @@
 // Подсказка: внутри одного обработчика можно вызывать несколько setter-ов
 // подряд — setCartCount(...) и setTotal(...) в одной функции.
 
+import { useState } from 'react'
 
+function App() {
+  const [cartCount, setCartCount] = useState(0)
+  const [isFavorite, setIsFavorite] = useState(false)
+  const [total, setTotal] = useState(0)
+
+  function handleAdd() {
+    setCartCount(cartCount + 1)
+    setTotal(total + 650)
+  }
+
+  function handleToggleFavorite() {
+    setIsFavorite(!isFavorite)
+  }
+
+  function handleClearCart() {
+    setCartCount(0)
+    setTotal(0)
+  }
+
+  return (
+    <div>
+      <p>В корзине «Зоомагазин «Лапки»»: {cartCount}</p>
+      <p>Сумма: {total} ₽</p>
+      <p>Избранное: {String(isFavorite)}</p>
+      <button onClick={handleAdd}>Добавить в корзину</button>
+      <button onClick={handleClearCart}>Очистить корзину</button>
+      <button onClick={handleToggleFavorite}>
+        В избранное / Убрать из избранного
+      </button>
+    </div>
+  )
+}
 
 // --- Задача уровня собеседования ---
 
@@ -84,3 +121,11 @@
 
 // Подсказка: вспомните из темы 3 методички — setState не просто меняет
 // значение, а ещё и запускает перерисовку компонента.
+
+// Ответ: setCartCount не меняет переменную напрямую, а ставит обновление
+// состояния в очередь React; после этого компонент вызывается заново, и
+// useState возвращает уже новое значение. Прямое присваивание не создаёт
+// такую запись, поэтому React не узнаёт о необходимости перерисовать
+// интерфейс.
+
+export default App

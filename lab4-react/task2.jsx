@@ -33,6 +33,10 @@
 // внутри компонента props — это целый объект, а не отдельная переменная
 // name. Обращаться нужно через props.name.
 
+// Ответ: при записи function ProductCard(props) в области видимости есть
+// только объект props, а отдельной переменной name нет. Поэтому нужно
+// обращаться props.name или деструктурировать параметр: { name }.
+
 
 
 // --- Средний уровень ---
@@ -88,7 +92,29 @@
 // Подсказка: именно в этом смысл props — один компонент, разные данные
 // при каждом вызове.
 
+function ProductCard({ name, price, discount = "0%", quantity = 1 }) {
+  const upperName = name.toUpperCase()
+  const total = price * quantity
 
+  return (
+    <div className="product-card">
+      <p>{upperName}</p>
+      <p>{price} ₽</p>
+      <p>Скидка: {discount}</p>
+      <p>Итого: {total} ₽</p>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <div>
+      <ProductCard name="Корм для кошек" price={650} quantity={3} />
+      <ProductCard name="Игрушка-мышка" price={180} />
+      <ProductCard name="Поводок" price={450} discount="10%" />
+    </div>
+  )
+}
 
 // --- Задача уровня собеседования ---
 
@@ -100,3 +126,10 @@
 
 // Подсказка: вспомните таблицу из темы 2 методички — HTML-атрибут всегда
 // строка, JSX prop — любое JS-значение.
+
+// Ответ: HTML-атрибут всегда приводит значение к строке, а JSX prop
+// передаёт любое JavaScript-значение: число, boolean, объект, массив или
+// функцию. Поэтому price="220" — строка, а price={220} — число, и с ним
+// можно выполнять вычисления.
+
+export default App
